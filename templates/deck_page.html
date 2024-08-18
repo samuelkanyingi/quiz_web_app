@@ -230,8 +230,19 @@
         </div> -->
     </div>
 </div>
-<script>
 
+<!-- Delete Confirmation modal -->
+ <div id="DeleteConfirmationModal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="closeDeleteModal">&times;</span>
+        <h2>Are you sure you want to delete?</h2>
+        <button id="confirmDeleteBtn" class="confirm-btn">Yes</button>
+        <button id="cancelDeleteBtn" class="cancel-btn">No</button>
+    </div>
+ </div>
+
+<script>
+// Add quiz modal
 var addQuizModal = document.getElementById("addQuizModal");
 var addQuizBtn = document.getElementById("addQuizBtn");
 var closeAddQuizModal = document.getElementById("closeAddQuizModal");
@@ -270,11 +281,6 @@ document.querySelectorAll('.edit-btn').forEach(function(button) {
 closeBtn.onclick = function() {
     editQuizModal.style.display = "none";
 }
-// window.onclick = function(event) {
-//     if (event.target == editQuizModal){
-//         editQuizModal.style.display = 'none';
-//     }
-// }
 
 // takeQuiz Modal
 var takeQuizModal = document.getElementById("takeQuizModal");
@@ -399,6 +405,12 @@ takeQuizBtn.onclick = function() {
 closeTakeQuizModal.onclick = function() {
     takeQuizModal.style.display = "none";
 }
+
+// Delete Confirmation Modal
+var deleteConfirmationModal = document.getElementById('deleteConfirmationModal');
+var closeDeleteModal = document.getElementById("closeDeleteModal");
+var confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+var cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
 
 
 // Handle clicks outside of modals
