@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>popup</title>
+    <style>
+       .modal {
+        display: none;
+        position: fixed;
+        /* z-index: 1; */
+        left: 0;
+        top: 0;
+        overflow:auto;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+       } 
+       .modal-content {
+        background-color: greenyellow;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 30%;
+        border-radius: 5px;
+       }
+       .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+       }
+       .close:hover{
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+       }
+       
+       .flash-message {
+        padding: 10px;
+        margin: 5px 0;
+        border-radius: 5px;
+        color: white;
+       }
+       .flash-success {
+        background-color: green;
+       }
+       .flash-error {
+        background-color: red;
+       }
+       .flash-message .close {
+        cursor: pointer;
+        font-size: 18px;
+        transition: color 0.3s;
+       }
+       .flash-message .close:hover {
+        color: #ddd;
+       }
+
+    </style>
+</head>
+<body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-message flash-{{ category }}">
+                    {{ message }}
+                    <span class="close">&times;</span>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+     
+    <button id="myBtn">Add new deck</button>
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span  class="close">&times;</span>
+            <h2> Add New Quiz</h2>
+            <p> Some text in the Modal..</p>
+            <form id="quizForm">
+                <label for="title">Quiz Title:</label>
+                <input type="text" id="title" name="title" required>
+
+                <label for="question"> question</label>
+                <input type="text" id="question" name="question" required>
+                
+                <label for="option1"> option1 :</label>
+                <input type="text" id="option1" name="option1" required>
+                
+                <label for="option2"> option2: </label>
+                <input type="text" id="option2" name="option2" required>
+
+                <label for="option3"> option3: </label>
+                <input type="text" id="option3" name="option3" required>
+
+                <label for="correctAnswer">Correct Answer:</label>
+                <select id="correctAnswer" name="correctAnswer" required>
+                    <option value=""> Select Correct Answer </option>
+                    <option value="1">Option 1</option>
+                    <option value="2"> Option 2</option>
+                    <option value="3"> Option 3</option>
+                </select>
+
+                <button type="submit">Save</button>
+
+            </form>
+
+        </div>
+    </div>
+    <h2>Quiz list</h2>
+    <table id="quizTable" border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th> 
+                <th> Question </th>
+                <th> Actions</th>
+            </tr>
+
+        </thead>
+    </table>
+    <script>
+        function addCloseButtonListeners() {
+            var closeButtons = document.querySelectorAll('.flash-message .close')
+            closeButtons.forEach(function(button) {
+                button.addEventListener('click', function(){
+                    var flashMessage = button.parentElement;
+                    flashMessage.style.display = 'none';
+                });
+            });
+        }
+        
+        function loadQuizTable() {
+            fetch('/get_quiz')
+                .then(response => response.json())
+                .then(quizzes => {       
+                    var table = document.getElementById('quizTable')
+                    while (table.rows.length > 1) {
+                        table.deleteRow(1)
+                    }
+                    quizzes.forEach(quiz => {
+                        var row = table.insertRow();
+                        row.insertCell().textContent = quiz.id;
+                        row.insertCell().textContent = quiz.title;
+                        row.insertCell().textContent = quiz.question;
+                        row.insertCell().textContent = quiz.created_at;
+                    
+                        var actionCell = row.insertCell();
+                    
+                        var deleteButton = document.createElement('button')
+                    
+                        deleteButton.textContent = 'Delete';
+                    
+                        deleteButton.addEventListener('click', () => deleteQuiz(quiz.id));
+                    
+                        actionCell.appendChild(deleteButton);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading quizzes:', error);
+            });
+    }
+
+        // document.addEventListener('DOMContentLoaded', addCloseButtonListeners, loadQuizTable);
+        document.addEventListener('DOMContentLoaded', function() {
+        addCloseButtonListeners();
+        loadQuizTable();
+    });
+
+        var modal = document.getElementById("myModal")
+        var btn = document.getElementById("myBtn")
+        var span = document.getElementsByClassName("close")[0];
+        var quizForm = document.getElementById('quizForm');
+        btn.onclick = function() {
+            modal.style.display = "block";
+        }
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none"
+            }
+        }
+    
+        quizForm.addEventListener("submit", function(event)
+        {
+            event.preventDefault(); 
+            var title = document.getElementById("title").value;
+            var question = document.getElementById("question").value;
+            var option1 = document.getElementById("option1").value;
+            var option2 = document.getElementById("option2").value;
+            var option3 = document.getElementById("option3").value;
+
+    //    console.log("Question:", question);
+    //    console.log("option 1:", option1);
+    //    console.log("option 2", option2);
+    //    console.log("option 3", option3);
+    //    console.log("Correct Answer:", correctAnswer);
+
+        fetch('/save_quiz', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                title: title,
+                question: question,
+                option1: option1,
+                option2: option2,
+                option3: option3,
+                correctAnswer: correctAnswer
+            })
+        })
+        .then(response => {
+            
+                console.log('quiz saved successfully');
+            
+                quizForm.reset();
+            
+                modal.style.display = "none";
+                loadQuizTable();
+                window.location.reload();
+            
+        })
+        .catch(error => {
+            console.error('Error saving quiz:', error);
+        });
+    });
+    function deleteQuiz(quizId) {
+        fetch(`/delete_quiz/${quizId}`, {
+            method: 'DELETE',
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log('Quiz deleted successfully')                
+                loadQuizTable();
+            }
+             
+            else {
+                return response.json().then(errorData => {
+                    console.error("failed to delete quiz", errorData)
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Erro deleing quiz: ', error);
+        });
+        }
+    
+    </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>quiz page</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles2.css') }}">
+
+</head>
+<body>
+ 
+    <div class="start-btn">
+        <button>start quiz</button>
+    </div>
+    <div class="info_box">
+        <div class="info_title">
+            <span>Rules of the game</span>
+        </div>
+        <div class="info_list">
+            <div class="info"> 1. You have only <span>15 seconds</span> per question</div>
+            <div class="info">2. Once you select an answer you cannot reselect</div>
+            <div class="info">3. You get points based on correct answers</div>
+            </div>
+            <div class="buttons">
+                <button class="quit">Exit quiz</button>
+                <button class="restart">Continue</button>
+            </div>
+    </div>
+
+</body>
+</html>

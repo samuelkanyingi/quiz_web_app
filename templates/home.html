@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <script src="{{ url_for('static', filename='main.js') }}"></script -->
+    <title>Quiz Table</title>
+    <style>
+        #table-container {
+            background-color: #ee6969;
+            margin: 0 auto;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+            transition: max-height 0.3s ease;
+            overflow: hidden;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #0e0c0c;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        table, th, td {
+            border: none;
+        }
+        .popup {
+            background-color: rgba(0, 0, 0, 0.4);
+            width: 100%;
+            height: 100%;
+            display: none;
+            overflow: auto;
+            z-index: 1;
+        }
+        .popup-content {
+            background-color: yellow;
+            margin: 15% auto;
+            padding: 20px;
+            width: 30%;
+            border: 1px solid #888;
+            border-radius: 5px;
+        }
+        .modal {
+        display: none;
+        position: fixed;
+        /* z-index: 1; */
+        left: 0;
+        top: 0;
+        overflow:auto;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+       } 
+       .modal-content {
+        background-color: greenyellow;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 30%;
+        border-radius: 5px;
+       }
+       .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+       }
+       .close:hover{
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+       }
+    </style>
+</head>
+<body>
+    <div id="table-container">
+        <table id="quiz-table">
+            <thead>
+                <tr>
+                    <th>Deck</th>
+                    <th>Number of quizzes</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Rows added dynamically -->
+                {% for deck in decks %}
+                <tr>
+                <!-- <td>{{ deck.title }}</td> -->
+                <td><a href="{{ url_for('deck_page', deck_id=deck.id) }}">{{ deck.title }}</a></td>
+                <td>0</td>
+                <td>
+                    <!-- <button>Edit</button> -->
+                    <button class="edit-btn" data-deck-id="{{ deck.id }}" data-deck-title="{{ deck.title }}">Edit</button>
+                        <!-- <button> Delete</button> -->
+                        <!-- <button class="delete-btn" data-deck-id="{{ deck.id }}">Delete</button> -->
+                        <!-- <a href="{{ url_for('delete_deck', deck_id=deck.id) }}" onclick="return confirm('Are you sure you want to delete this deck?')">Delete</a> -->
+                        <form id="quizForm" action="{{ url_for('delete_deck', deck_id=deck.id) }}" method="post" style="display:inline;">
+                        
+                            
+                            <button type="submit">Delete</button>
+            
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Button to trigger Add popup -->
+            <!-- <button id="add-row-btn" onclick="showAddPopup()">Add Row</button> -->
+            
+            <button id="myBtn">Add new deck</button>
+            <div id="myModal" class="modal">
+                <div class="modal-content">
+                    <span  class="close">&times;</span>
+                    <h2> Add New Quiz</h2>
+                    <p> Some text in the Modal..</p>
+                    <form id="quizForm" action="/add_deck" method="post">
+                        <label for="title">Enter Deck Name:</label>
+                        <input type="text" id="title" name="title" required>
+        
+                        
+                        <button type="submit">Save</button>
+        
+                    </form>
+        
+                </div>
+            </div>
+
+         <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Edit Deck Name</h2>
+            <form id="editForm" action="/edit_deck" method="post">
+                <input type="hidden" id="edit-deck-id" name="deck_id">
+                <label for="edit-deck-title">Deck Name:</label>
+                <input type="text" id="edit-deck-title" name="title" required>
+                <button type="submit">Save</button>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Popup for adding a deck
+    <div id="myPopup" class="popup">
+        <div class="popup-content">
+            <h2>Enter Deck Name</h2>
+            <input type="text" id="deck-name-input" placeholder="Enter deck name">
+            <button onclick="addDeck()">Save</button>
+            <button onclick="closePopup('myPopup')">Cancel</button>
+        </div>
+    </div>
+
+    <--Popup for editing a deck -->
+    <!-- <div id="editPopup" class="popup">
+        <div class="popup-content">
+            <h2>Edit Deck Name</h2>
+            <input type="text" id="edit-deck-name-input" placeholder="Enter new deck name">
+            <div class="button-group">
+                <button class="save-button" onclick="saveEditedDeck()">Save</button>
+            </div>
+            <button class="cancel-button" onclick="closePopup('editPopup')">Cancel</button>
+        </div>
+    </div> -->
+
+    <script>
+        function addCloseButtonListeners() {
+            var closeButtons = document.querySelectorAll('.flash-message .close')
+            closeButtons.forEach(function(button) {
+                button.addEventListener('click', function(){
+                    var flashMessage = button.parentElement;
+                    flashMessage.style.display = 'none';
+                });
+            });
+        }
+        var modal = document.getElementById("myModal")
+        var btn = document.getElementById("myBtn")
+        var span = document.getElementsByClassName("close")[0];
+        var quizForm = document.getElementById('quizForm');
+        btn.onclick = function() {
+            modal.style.display = "block";
+        }
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none"
+            }
+        }
+        
+    //document.addEventListener('DOMContentLoaded', function() {
+    // Select all delete buttons
+    const deleteButtons = document.querySelectorAll('.delete-button');
+
+    // Add click event listener to each delete button
+    // deleteButtons.forEach(button => {
+    //     button.addEventListener('click', function() {
+    //         // Get the deck ID from the button's data attribute
+    //         const deckId = this.getAttribute('data-deck-id');
+
+    //         // Confirm deletion
+    //         if (confirm('Are you sure you want to delete this deck?')) {
+    //             // Send a DELETE request to the server
+    //             fetch(`/delete_deck/${deckId}`, {
+    //                 method: 'DELETE',
+    //                 headers: {
+    //                     'Content-Type': 'application/json',
+    //                 }
+    //             })
+    //             .then(response => response.json())
+    //             .then(data => {
+    //                     button.parentNode.parentNode.remoce();          
+    //             })
+    //             .catch(error => {
+    //                 console.error('Error:', error);
+    //                 alert('Failed to delete the deck.');
+    //             });
+    //         }
+    //      });
+    //  });
+    // Functionality for Edit Deck Modal
+        var editModal = document.getElementById("editModal");
+        var closeEditModal = editModal.getElementsByClassName("close")[0];
+
+        document.querySelectorAll('.edit-btn').forEach(function(button) {
+            button.addEventListener('click', function() {
+                var deckId = this.getAttribute('data-deck-id');
+                var deckTitle = this.getAttribute('data-deck-title');
+                //populate modal form with deck data
+                document.getElementById('edit-deck-id').value = deckId;
+                document.getElementById('edit-deck-title').value = deckTitle;
+                editModal.style.display = "block";
+            });
+        });
+        //close edit modal
+        closeEditModal.onclick = function() {
+            editModal.style.display = "none";
+        }
+        window.onclick = function(event) {
+            if (event.target == editModal) {
+                editModal.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>

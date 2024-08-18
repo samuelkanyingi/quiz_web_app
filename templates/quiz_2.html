@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='quiz.css') }}">
+    <title>Quiz paget</title>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1 id="question">{{ quiz_data[0]['question'] }}</h1>
+        <form id="quiz-form">
+            {% for  answer in quiz_data[0]['answers'] %}
+                <div class="answer-option">
+                    <input type="radio" id="answer-{{ loop.index0 }}" name ="answer" value="{{ loop.index0 }}">
+                    <label for="answer-{{ loop.index0 }}">{{ answer }}</label>
+                </div>
+            {% endfor %}
+            <button type="submit" id="submit-answer">submit</button>
+        </form>
+        <div id="results"></div>
+    </div>
+    <script src="{{ url_for('static', filename='quiz.js') }}"></script>
+</body>
+</html>

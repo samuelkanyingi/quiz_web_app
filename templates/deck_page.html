@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz page</title>
+    <style>
+        #table-container {
+            background-color: #ee6969;
+            margin: 0 auto;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+            transition: max-height 0.3s ease;
+            overflow: hidden;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #0e0c0c;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        table, th, td {
+            border: none;
+        }
+
+        .modal {
+        display: none;
+        position: fixed;
+        /* z-index: 1; */
+        left: 0;
+        top: 0;
+        overflow:auto;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+       } 
+       .modal-content {
+        background-color: greenyellow;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 30%;
+        border-radius: 5px;
+       }
+       .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+       }
+       .close:hover{
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+       }
+       .question {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* Styling for the dynamic answer */
+.answer {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 15px;
+}
+/* Styling for the dynamic buttons */
+.show-answer-btn, .next-question-btn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.show-answer-btn:hover, .next-question-btn:hover {
+    background-color: #45a049;
+}
+    </style>
+</head>
+<body>
+    <h1>{{ deck.title }}</h1>
+<p>This deck is currently empty.</p>
+<!-- <button id="addQuizBtn">Add Quiz</button> -->
+ <div class="button-container">
+        <button id="addQuizBtn">Add new quiz</button>
+        <button id="takeQuizBtn">Take Quiz</button>
+    </div>
+<div id="table-container">
+   
+        <table id="quiz-table">
+            <thead>
+                <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                {% for quiz in quizzes %}
+                <tr>
+                    <td>{{ quiz.question }}</td>
+                    <td>{{ quiz.answer }}</td>
+                    <td>
+                        <!-- Edit Button -->
+                        <button class="edit-btn" data-quiz-id="{{ quiz.id }}" data-question="{{ quiz.question }}" data-answer="{{ quiz.answer }}">Edit</button>
+                        <!-- Delete Button -->
+                        <form action="{{ url_for('delete_quiz', quiz_id=quiz.id) }}" method="post" style="display:inline;">
+                            <button type="submit">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+
+<!-- Add Quiz Modal -->
+<div id="addQuizModal" class="modal">
+    <div class="modal-content">
+        <span class="close"  id="closeAddQuizModal">&times;</span>
+        <h2>Add Quiz</h2>
+        <form id="addQuizForm" method="POST" action="{{ url_for('add_quiz', deck_id=deck.id) }}">
+            <input type="hidden" name="deck_id" value="{{ deck.id }}">
+            <label for="question">Question:</label>
+            <input type="text" id="question" name="question" required>
+            <br>
+            <label for="answer">Answer:</label>
+            <input type="text" id="answer" name="answer" required> <br>
+
+            <button type="submit">Save</button>
+
+            <button type="button" id="addMoreQuizBtn">Add More Quiz</button>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Question Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="closeEditModal">&times;</span>
+        <h2>Edit Question</h2>
+        <form action="/edit_quiz" method="post">
+            <input type="hidden" id="edit-quiz-id" name="quiz_id">
+            <label for="edit-question">Question:</label>
+            <input type="text" id="edit-question" name="question" required>
+            <label for="edit-answer">Answer:</label>
+            <input type="text" id="edit-answer" name="answer" required>
+            <button type="submit">Save</button>
+        </form>
+    </div>
+</div>
+
+<!--TakeQuiz modal-->
+<div id="takeQuizModal" class="modal">
+    <div class = "modal-content">
+        <span class= "close" id="closeTakeQuizModal">&times;</span>
+        <h2>Take quiz</h2>
+        <p>Quiz content goes here</p>
+        <!-- <div id="quiz-container">
+            <p id="quiz-question"></p>
+            <button id="showAnswerBtn" style="display: none;">Show answer</button>
+            <p id="quiz-answer" style="display: none;"></p>
+            <button id="nextQuestionBtn" style="display: none">Next Question</button>
+        </div> -->
+    </div>
+</div>
+<script>
+var addQuizModal = document.getElementById("addQuizModal");
+var addQuizBtn = document.getElementById("addQuizBtn");
+var closeAddQuizModal = document.getElementById("closeAddQuizModal");
+var closeBtn = document.getElementsByClassName("close");
+
+addQuizBtn.onclick = function() {
+    addQuizModal.style.display = "block";
+}
+
+var closeButtons = document.getElementsByClassName("close");
+for (var i = 0; i < closeButtons.length; i++) {
+    closeButtons[i].onclick = function() {
+        this.parentElement.parentElement.style.display = "none";
+    }
+}
+
+document.getElementById("addMoreQuizBtn").onclick = function() {
+    document.getElementById("addQuizForm").reset();
+}
+
+// edit Quiz Modal
+var editQuizModal = document.getElementById("editModal");
+var closeEditQuizModal = document.getElementById("closeEditModal");
+document.querySelectorAll('.edit-btn').forEach(function(button) {
+    button.addEventListener('click', function() {
+        var quizId = this.getAttribute('data-quiz-id');
+        var question = this.getAttribute('data-question');
+        var answer = this.getAttribute('data-answer');
+        document.getElementById('edit-quiz-id').value = quizId;
+        document.getElementById('edit-question').value = question;
+        document.getElementById('edit-answer').value = answer;
+
+        editQuizModal.style.display = "block";
+    });
+});
+closeBtn.onclick = function() {
+    editQuizModal.style.display = "none";
+}
+// window.onclick = function(event) {
+//     if (event.target == editQuizModal){
+//         editQuizModal.style.display = 'none';
+//     }
+// }
+
+// takeQuiz Modal
+var takeQuizModal = document.getElementById("takeQuizModal");
+var takeQuizBtn = document.getElementById("takeQuizBtn");
+var closeTakeQuizModal = document.getElementById("closeTakeQuizModal");
+
+//store questions and answers
+function collectQuizData() {
+    var quizzes = [];
+    var rows = document.querySelectorAll('#quiz-table tbody tr');
+
+    rows.forEach(function(row) {
+        //get questions in table
+        var question = row.cells[0].textContent;
+        var answer = row.cells[1].textContent;
+
+        quizzes.push({question:question, answer: answer});
+    })
+    return quizzes;
+}
+let currentQuestionIndex = 0;
+let quizzes = [];
+
+// display questions and answers
+ function displayCurrentQuestion() {
+    var modalContent =  takeQuizModal.querySelector('.modal-content');
+    modalContent.innerHTML = ''; // clear previos content
+
+    // check there are more questions
+    if (currentQuestionIndex < quizzes.length) {
+        var quiz = quizzes[currentQuestionIndex];
+
+        // create question element
+        var questionE1 = document.createElement('p');
+        questionE1.textContent = `q${currentQuestionIndex + 1}: ${quiz.question}`;
+        questionE1.classList.add('question'); // add CSS class
+        
+        // Create answer element
+        var answerE1 = document.createElement('p');
+        answerE1.textContent = `Answer: ${quiz.answer}`;
+        answerE1.classList.add('answer'); // add CSS class
+        answerE1.style.display = 'none';
+
+        // button to show answer
+        var showAnswerBtn = document.createElement('button');
+        showAnswerBtn.textContent = 'Show Answer';
+        showAnswerBtn.classList.add('show-answer-btn'); // add CSS class
+        showAnswerBtn.onclick = function() {
+            answerE1.style.display = 'block'
+        };
+
+        // button to move to next question
+        var nextQuestionBtn = document.createElement('button');
+        nextQuestionBtn.textContent = 'Next Question';
+        nextQuestionBtn.classList.add('next-question-btn'); // add CSS class
+        nextQuestionBtn.onclick = function() {
+            currentQuestionIndex++;
+            displayCurrentQuestion();
+        };
+        modalContent.appendChild(questionE1);
+        modalContent.appendChild(showAnswerBtn);
+        modalContent.appendChild(answerE1);
+        modalContent.appendChild(nextQuestionBtn);
+
+
+    } else {
+        // no more questions left
+        modalContent.innerHTML = '<p>Congrats You are finished study</p>'
+    }
+   
+}
+
+
+takeQuizBtn.onclick = function() {
+    quizzes = collectQuizData(); // collect quiz data from table
+    currentQuestionIndex = 0;
+    displayCurrentQuestion() // display quiz data in a modal
+    takeQuizModal.style.display = "block";
+}
+
+closeTakeQuizModal.onclick = function() {
+    takeQuizModal.style.display = "none";
+}
+
+
+// Handle clicks outside of modals
+window.onclick = function(event) {
+    if (event.target == addQuizModal) {
+        addQuizModal.style.display = "none";
+    } else if (event.target == editQuizModal) {
+        editQuizModal.style.display = 'none';
+    } else if (event.target == takeQuizModal) {
+        takeQuizModal.style.display = "none";
+    }
+}
+
+</script>
+</body>
+</html>

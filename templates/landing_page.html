@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+    <title>landing page</title>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbardiv">
+            <div class="logo">
+                <a href="#">Quiz App</a>
+            </div>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Contact</a></li>
+                <button><a href="#">login</a></button>
+                <button><a href="#">signup</a></button>
+            </ul>
+        </div>
+    </nav>
+   
+    <div class="article">
+        <img class="image-content" src="{{ url_for('static', filename='quiz1.jpg')}}" width="500" height="300"alt="quiz image">
+
+        <h1> Welcome to my quiz app. Learn better now.</h1>
+        <p>Neque porro quisquam est qui dolorem ipsum quia <br>
+        dolor sit amet, consectetur, adipisci velit..."</p>
+        <p>Neque porro quisquam est qui dolorem ipsum quia <br>
+        <p>Neque porro quisquam est qui dolorem ipsum quia <br>
+        <p>Neque porro quisquam est qui dolorem ipsum quia <br>
+        <p>Neque porro quisquam est qui dolorem ipsum quia <br>
+        <p>Neque porro quisquam est qui dolorem ipsum quia <br>
+        <button class="try-now-btn">Try Now</button>
+    </div>
+</body>
+</html>
