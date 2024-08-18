@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz page</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
+
     <style>
         #table-container {
             background-color: #ee6969;
@@ -87,6 +89,59 @@
 .show-answer-btn:hover, .next-question-btn:hover {
     background-color: #45a049;
 }
+.progress-container {
+    width: 100%;
+    background-color: #75b868;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    height: 20px;
+}
+.progress-bar {
+    height: 100%;
+    background-color: green;
+    border-radius: 5px;
+    width: 0%;
+    text-align: center;
+    color: white;
+    font-size: 20px;
+    
+}
+.done-btn {
+    background-color: #45a050;;
+    cursor: pointer;
+    color: white;
+    border-radius: 5px;
+    border: none;
+    /* margin-top: 15px; */
+    font-size: 16px;
+    padding: 10px 20px;
+    display: block;
+    margin: 20px auto;
+}
+#editModal label {
+    color:#333;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 25px;
+}
+.modal-content button[type="submit"],
+.modal-content button[type="button"] {
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 15px;
+    padding: 10px 20px;
+    margin-top: 8px;
+    margin-left: 15px;
+}
+.modal-content input[type="text"] {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
+    width: 100%;
+}
     </style>
 </head>
 <body>
@@ -133,10 +188,9 @@
         <h2>Add Quiz</h2>
         <form id="addQuizForm" method="POST" action="{{ url_for('add_quiz', deck_id=deck.id) }}">
             <input type="hidden" name="deck_id" value="{{ deck.id }}">
-            <label for="question">Question:</label>
-            <input type="text" id="question" name="question" required>
-            <br>
-            <label for="answer">Answer:</label>
+            <label for="question">Question:</label> <br>
+            <input type="text" id="question" name="question" required> <br>
+            <label for="answer">Answer:</label> <br>
             <input type="text" id="answer" name="answer" required> <br>
 
             <button type="submit">Save</button>
@@ -153,10 +207,10 @@
         <h2>Edit Question</h2>
         <form action="/edit_quiz" method="post">
             <input type="hidden" id="edit-quiz-id" name="quiz_id">
-            <label for="edit-question">Question:</label>
-            <input type="text" id="edit-question" name="question" required>
-            <label for="edit-answer">Answer:</label>
-            <input type="text" id="edit-answer" name="answer" required>
+            <label for="edit-question">Question:</label> <br>
+            <input type="text" id="edit-question" name="question" required> <br>
+            <label for="edit-answer">Answer:</label><br>
+            <input type="text" id="edit-answer" name="answer" required> <br>
             <button type="submit">Save</button>
         </form>
     </div>
@@ -177,6 +231,7 @@
     </div>
 </div>
 <script>
+
 var addQuizModal = document.getElementById("addQuizModal");
 var addQuizBtn = document.getElementById("addQuizBtn");
 var closeAddQuizModal = document.getElementById("closeAddQuizModal");
@@ -248,6 +303,23 @@ let quizzes = [];
     var modalContent =  takeQuizModal.querySelector('.modal-content');
     modalContent.innerHTML = ''; // clear previos content
 
+    // create and style progress bar container
+    var progressContainer = document.createElement('div')
+    progressContainer.classList.add('progress-container'); // add css
+
+    //create and style progress bar itself 
+    var progressBar = document.createElement('div')
+    progressBar.classList.add('progress-bar') // add css
+
+    // calculate progress as percentage
+    var progressPercentage = ((currentQuestionIndex + 1) / quizzes.length) * 100;
+    progressBar.style.width = progressPercentage + '%';
+    progressBar.textContent = Math.round(progressPercentage) + '%';
+
+    //Append progress bar to container
+    progressContainer.appendChild(progressBar);
+    modalContent.appendChild(progressContainer)
+
     // check there are more questions
     if (currentQuestionIndex < quizzes.length) {
         var quiz = quizzes[currentQuestionIndex];
@@ -287,9 +359,33 @@ let quizzes = [];
 
     } else {
         // no more questions left
-        modalContent.innerHTML = '<p>Congrats You are finished study</p>'
+        modalContent.innerHTML = '<p><center><h2>Congrats You are finished studying  &#127881 </h2></center> </p>'
+        var doneBtn = document.createElement('button');
+        doneBtn.textContent = "Done";
+        doneBtn.classList.add('done-btn');
+
+        doneBtn.onclick = function () {
+            takeQuizModal.style.display = 'none'; //close modal with done button
+        }
+        var cebrationMessage = document.createElement('celebration')
+        cebrationMessage.style.display = 'block';
+
+        setTimeout(function() {
+            cebrationMessage.style.display = 'none'
+        }, 5000);
+        modalContent.appendChild(doneBtn);
+        runCofetti();
+
     }
    
+}
+
+function runCofetti() {
+    confetti({
+        particleCount: 100,
+        spread: 70,
+        prigin: {y:0.6}
+    })
 }
 
 
