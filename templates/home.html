@@ -85,7 +85,8 @@
             <thead>
                 <tr>
                     <th>Deck</th>
-                    <th>Number of quizzes</th>
+                    <th>Number of quizzes </th>
+                    <th>Due quizzes</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -96,6 +97,7 @@
                 <!-- <td>{{ deck.title }}</td> -->
                 <td><a href="{{ url_for('deck_page', deck_id=deck.id) }}">{{ deck.title }}</a></td>
                 <td>0</td>
+                <td><!--due --></td>
                 <td>
                     <!-- <button>Edit</button> -->
                     <button class="edit-btn" data-deck-id="{{ deck.id }}" data-deck-title="{{ deck.title }}">Edit</button>
@@ -151,7 +153,7 @@
     </div>
 
 
-    <!-- Popup for adding a deck
+    <!-- Popup for adding a deck -->
     <div id="myPopup" class="popup">
         <div class="popup-content">
             <h2>Enter Deck Name</h2>
@@ -161,7 +163,7 @@
         </div>
     </div>
 
-    <--Popup for editing a deck -->
+    <!--Popup for editing a deck -->
     <!-- <div id="editPopup" class="popup">
         <div class="popup-content">
             <h2>Edit Deck Name</h2>
