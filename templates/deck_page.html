@@ -390,6 +390,9 @@ let quizzes = [];
 
         doneBtn.onclick = function () {
             takeQuizModal.style.display = 'none'; //close modal with done button
+            setTimeout(function() {
+                window.location.href = '/decks'; //redirect to deck page called home.html
+            }, 2000)
         }
         var cebrationMessage = document.createElement('celebration')
         cebrationMessage.style.display = 'block';
