@@ -142,6 +142,24 @@
     box-sizing: border-box;
     width: 100%;
 }
+#deleteConfirmationModal .modal-content {
+    background-color: white;
+    text-align: center;
+    border-radius: 5px;
+    width: 30%;
+
+}
+#deleteConfirmatiomModal h2 {
+    font-size: 18px;
+}
+#deleteConfirmationModal .confirm-btn,
+#deleteConfirmationModal .cancel-btn {
+    background-color: #45a049;
+    padding: 10px 20px;
+    border: none;
+    margin: 10px;
+    border-radius: 5px;
+}
     </style>
 </head>
 <body>
@@ -171,7 +189,7 @@
                         <!-- Edit Button -->
                         <button class="edit-btn" data-quiz-id="{{ quiz.id }}" data-question="{{ quiz.question }}" data-answer="{{ quiz.answer }}">Edit</button>
                         <!-- Delete Button -->
-                        <form action="{{ url_for('delete_quiz', quiz_id=quiz.id) }}" method="post" style="display:inline;">
+                        <form action="{{ url_for('delete_quiz', quiz_id=quiz.id) }}" method="post"  class="inline-delete">
                             <button type="submit">Delete</button>
                         </form>
                     </td>
@@ -232,7 +250,7 @@
 </div>
 
 <!-- Delete Confirmation modal -->
- <div id="DeleteConfirmationModal" class="modal">
+ <div id="deleteConfirmationModal" class="modal">
     <div class="modal-content">
         <span class="close" id="closeDeleteModal">&times;</span>
         <h2>Are you sure you want to delete?</h2>
@@ -406,12 +424,44 @@ closeTakeQuizModal.onclick = function() {
     takeQuizModal.style.display = "none";
 }
 
-// Delete Confirmation Modal
+//variable declarations that reference html elements
+// Delete Confirmation Modal references html element
 var deleteConfirmationModal = document.getElementById('deleteConfirmationModal');
 var closeDeleteModal = document.getElementById("closeDeleteModal");
 var confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
 var cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
 
+//track quiz item being removed
+var quizToDelete = null;
+
+//attach event listeners
+document.querySelectorAll('form.inline-delete button[type="submit"]').forEach(function(button) {
+    button.addEventListener('click', function(event) {
+        //prevent form to submit
+        event.preventDefault();
+
+        // show confirmation modal
+        deleteConfirmationModal.style.display = "block";
+
+        // save current form being submitted
+        quizToDelete = event.target.closest('form');
+    })
+});
+// close modal when "no" is clicked
+cancelDeleteBtn.onclick = function() {
+    deleteConfirmationModal.style.display = "none";
+}
+
+//close modal when 'x'  is clicked
+closeDeleteModal.onclick = function() {
+    deleteConfirmationModal.style.display = "none"
+}
+confirmDeleteBtn.onclick = function() {
+    if(quizToDelete) {
+        quizToDelete.submit();
+    }
+    deleteConfirmationModal.style.display = "none";
+};
 
 // Handle clicks outside of modals
 window.onclick = function(event) {
@@ -422,7 +472,10 @@ window.onclick = function(event) {
     } else if (event.target == takeQuizModal) {
         takeQuizModal.style.display = "none";
     }
-}
+    else if (event.target == deleteConfirmationModal) {
+        deleteConfirmationModal.style.display = "none";
+    }
+};
 
 </script>
 </body>
