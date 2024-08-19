@@ -160,6 +160,22 @@
     margin: 10px;
     border-radius: 5px;
 }
+#feedback-container { 
+    margin-top: 20px;
+    justify-content: space-around;
+}
+#feedback-container button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin: 0 5px;
+}
+#feedback-container button:nth-child(1) {
+    background-color: #f44336;
+    margin-left: 5px;
+}
     </style>
 </head>
 <body>
@@ -240,12 +256,7 @@
         <span class= "close" id="closeTakeQuizModal">&times;</span>
         <h2>Take quiz</h2>
         <p>Quiz content goes here</p>
-        <!-- <div id="quiz-container">
-            <p id="quiz-question"></p>
-            <button id="showAnswerBtn" style="display: none;">Show answer</button>
-            <p id="quiz-answer" style="display: none;"></p>
-            <button id="nextQuestionBtn" style="display: none">Next Question</button>
-        </div> -->
+       
     </div>
 </div>
 
@@ -364,8 +375,18 @@ let quizzes = [];
         showAnswerBtn.textContent = 'Show Answer';
         showAnswerBtn.classList.add('show-answer-btn'); // add CSS class
         showAnswerBtn.onclick = function() {
-            answerE1.style.display = 'block'
-        };
+            if(answerE1.style.display === 'block')  {
+                answerE1.style.display = 'none';
+                showAnswerBtn.textContent = 'Show Answer';
+            } else {
+                answerE1.style.display = 'block';
+                showAnswerBtn.textContent = 'Hide Answer';
+                showFeedbackButtons();
+            }
+        }
+        //     answerE1.style.display = 'block'
+        //     showFeedbackButtons();  
+        // };
 
         // button to move to next question
         var nextQuestionBtn = document.createElement('button');
@@ -465,6 +486,76 @@ confirmDeleteBtn.onclick = function() {
     }
     deleteConfirmationModal.style.display = "none";
 };
+
+
+function showFeedbackButtons() {
+    // Check if the feedback buttons already exist by searching for the container by ID
+    let existingContainer = document.getElementById('feedback-container');
+      
+    //var modalContent = takeQuizModal.querySelector('.modal-content');
+    if (document.getElementById('feedback-container')) {
+            return;
+    }
+    if (existingContainer) {
+        return; // If it already exists, stop the function from adding more buttons
+    }
+    const feedbackContainer = document.createElement('div');
+
+    // create aand style  feedback container
+    var showFeedbackContainer = document.createElement('div');
+    showFeedbackContainer.classList.add('feedback-buttons');
+    // var buttons = ["Again", "Hard", "Good", "Easy"]; //labels to hold buttons
+    feedbackContainer.id = 'feedback-container';
+
+    const againBtn = document.createElement('button');
+    againBtn.textContent = 'Again';
+    const hardBtn = document.createElement('button');
+    hardBtn.textContent = 'Hard';
+    const goodBtn = document.createElement('button');
+    goodBtn.textContent = 'Good';
+    const easyBtn = document.createElement('button');
+    easyBtn.textContent = 'Easy';
+
+    // Append buttons to the container
+    feedbackContainer.appendChild(againBtn);
+    feedbackContainer.appendChild(hardBtn);
+    feedbackContainer.appendChild(goodBtn);
+    feedbackContainer.appendChild(easyBtn);
+
+    const modalContent = document.querySelector('#takeQuizModal .modal-content');
+    if (modalContent) {
+        modalContent.appendChild(feedbackContainer);
+    } else {
+        console.error('Modal content not found');
+    }
+    // Append the container to the document
+    // document.body.appendChild(feedbackContainer);
+    // iterate through and create feedback buttons
+    // buttons.forEach(function(text) {
+    //     var button = document.createElement('button');
+    //     button.textContent = text;
+    //     button.classList.add('feedback-btn');
+    //     button.onclick = function () {
+    //         quizFeedback[text.toLowerCase()]++;
+    //         handleFeedback(text);
+    //     };
+    //     modalContent.appendChild(button)
+    // });
+    //append contianer to modal
+    // modalContent.appendChild(showFeedbackContainer);
+
+}
+function handleFeedback(feedback) {
+    if (feedback == 'Again') {
+        // do something
+    }
+    else if (feedback == 'Hard') { 
+        //do something
+    }
+    else if (feedback === 'Easy') {
+        //do something
+    }
+}
 
 // Handle clicks outside of modals
 window.onclick = function(event) {
