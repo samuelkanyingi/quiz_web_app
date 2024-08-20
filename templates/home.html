@@ -6,9 +6,79 @@
     <!-- <script src="{{ url_for('static', filename='main.js') }}"></script -->
     <title>Quiz Table</title>
     <style>
+        body {
+    /* background-color: aqua; */
+    margin: 0;
+    padding: 0;
+}
+#signup {
+    background-color: bisque;
+    padding:20px;
+    margin-left: 400px;
+    margin-top: 100px;
+    text-align: center;
+    width: 300px;
+    align-items: center;
+    border-radius: 20px;
+}
+input[type="submit"] {
+    background-color: rgb(108, 108, 204) ;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+}
+
+
+.navbar {
+    background-color: rgb(5, 5, 5);
+    float: right;
+    font-family: 'calibri';
+    width: 100%;
+    margin-top: 0;
+    margin-bottom: 50px;
+    /* padding: 10px 0; */
+}
+.navbardiv{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+ .logo a {
+    font-weight: 600;
+    color: antiquewhite;
+    font-size: 40px;
+    text-decoration: none;
+}
+li {
+    list-style-type: none;
+    display: inline-block;
+}
+li a {
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    margin-right: 21px;
+    text-decoration: none;
+}
+button {
+    background-color: yellow;
+    margin-left: 9px;
+    border-radius: 10px;
+    width: 60px;
+}
+button a{
+    color:black;
+    font-weight: bold;
+    font-size: 15px;
+    text-decoration: none;
+    font-family: 'calibri';
+}
+
+
         #table-container {
             background-color: #ee6969;
-            margin: 0 auto;
+            margin-top: 50px;
             padding: 20px;
             border-radius: 5px;
             box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
@@ -79,6 +149,21 @@
        }
     </style>
 </head>
+<nav class="navbar">
+    <div class="navbardiv">
+        <div class="logo">
+            <a href="#">Quiz App</a>
+        </div>
+        <ul>
+            <li><a href="#">Home</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Contact</a></li>
+            
+            <button><a href="#">Logout</a></button>
+        </ul>
+    </div>
+</nav>
+
 <body>
     <div id="table-container">
         <table id="quiz-table">
@@ -96,8 +181,8 @@
                 <tr>
                 <!-- <td>{{ deck.title }}</td> -->
                 <td><a href="{{ url_for('deck_page', deck_id=deck.id) }}">{{ deck.title }}</a></td>
-                <td>0</td>
-                <td><!--due --></td>
+                <td>{{ deck.quiz_count }}</td>
+                <td>{{ deck.due_quiz_count }}</td>
                 <td>
                     <!-- <button>Edit</button> -->
                     <button class="edit-btn" data-deck-id="{{ deck.id }}" data-deck-title="{{ deck.title }}">Edit</button>
