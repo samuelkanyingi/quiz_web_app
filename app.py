@@ -17,7 +17,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), nullable=False)
     email = db.Column(db.String(150), nullable=False)
-    password = db.Colum(db.String(150), nullable=False)
+    password = db.Column(db.String(150), nullable=False)
 
 class Deck(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -37,8 +37,8 @@ class Quiz(db.Model):
     deck_id = db.Column(db.Integer, db.ForeignKey('deck.id'), nullable=True)
     next_review_time = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
 
-# with app.app_context():
-#     db.create_all()
+with app.app_context():
+    db.create_all()
 
 @app.route('/signup',  methods=['GET', 'POST'])
 def signup():
@@ -47,11 +47,12 @@ def signup():
         email = request.form.get('password')
         password = request.form.get('password')
 
+        print(f"Received signup data: Username={username}, Email={email}, Password={password}")
         #create a new instance
-        new_user = User(username=username, email=email, passowrd=password)
+        new_user = User(username=username, email=email, password=password)
         db.session.add(new_user)
         db.session.commit()
-        return redirect(url_for('login'))
+        #return redirect(url_for('login'))
     return render_template('index.html')
 
 
