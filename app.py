@@ -1,6 +1,8 @@
 from flask import Flask, jsonify, render_template, request, flash, session, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from datetime import datetime, timedelta
+
 app = Flask(__name__, static_folder='static')
 app.secret_key = 'sammy'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:root@localhost/quiz_db'
@@ -10,6 +12,12 @@ migrate = Migrate(app, db)
 
 current_question_index = 0 
 total_score = 0
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(150), nullable=False)
+    email = db.Column(db.String(150), nullable=False)
+    password = db.Colum(db.String(150), nullable=False)
 
 class Deck(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -26,14 +34,77 @@ class Quiz(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     question = db.Column(db.String(200), nullable=False)
     answer = db.Column(db.String(255), nullable=False)
-    deck_id = db.Column(db.Integer, db.ForeignKey('deck.id'), nullable=False)
-
-    #title = db.Column(db.String(100), nullable=False)
-# quiz = Quiz.query.first()
-# print(quiz.deck.title)  # Accessing the title of the related deck
+    deck_id = db.Column(db.Integer, db.ForeignKey('deck.id'), nullable=True)
+    next_review_time = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
 
 # with app.app_context():
 #     db.create_all()
+
+@app.route('/signup',  methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('password')
+        password = request.form.get('password')
+
+        #create a new instance
+        new_user = User(username=username, email=email, passowrd=password)
+        db.session.add(new_user)
+        db.session.commit()
+        return redirect(url_for('login'))
+    return render_template('index.html')
+
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    return render_template('login.html')
+
+def get_current_question():
+    # Example logic to get the latest question
+    current_question = Quiz.query.order_by(Quiz.id.desc()).first()
+    if current_question:
+        return current_question
+    return None
+
+@app.route('/get_current_question_id', methods=['GET'])
+def get_current_question_id():
+    # Assuming you have a method to get the current question ID from the session or other logic
+    current_question = get_current_question()  # Implement this method to fetch the current question
+    if current_question:
+        return jsonify({'id': current_question.id})
+    else:
+        return jsonify({'error': 'No current question found'}), 404
+
+
+@app.route('/update_next_review_time', methods=['POST'])
+def update_next_review_time():
+    print("Received POST request to /update_next_review_time")
+    data = request.get_json()
+    
+    print(f"Received data: {data}")
+    question_id = data.get('id')  
+    print("Question ID (integer):", question_id)
+    
+  
+    delay_time = data.get('delay_time') # convert to integer
+    print(f"Received data converted: {data}")
+ 
+    #calculate next review
+    next_review_time = datetime.now() + timedelta(milliseconds=delay_time)
+
+    #fetch quiz question by ID
+    quiz = Quiz.query.get(question_id)
+    print(f"Question ID: {question_id}")
+
+    if quiz:
+        quiz.next_review_time = next_review_time
+        db.session.commit()
+        print(f"Updated next review time for question ID {question_id} to {quiz.next_review_time}")
+        return jsonify(success=True, message='Next review time updated successfully')
+    else:
+        return jsonify(success=False, message='Quiz not found'), 404
+
 @app.route('/')
 def landing_page():
     return render_template('landing_page.html')
@@ -46,9 +117,27 @@ def get_message():
 @app.route('/home')
 def home():
     decks = Deck.query.all()
+    deck_data = []
+
+    # get current date
+    current_date = datetime.utcnow().date()
+
+    # prepare data for each deck
+    for deck in decks:
+        quiz_count = Quiz.query.filter_by(deck_id=deck.id).count()
+        due_quiz_count = Quiz.query.filter(
+            Quiz.deck_id == deck.id,
+            Quiz.next_review_time <= datetime.utcnow()
+        ).count()
+        deck_data.append({
+            'id': deck.id,
+            'title': deck.title,
+            'quiz_count': quiz_count,
+            'due_quiz_count': due_quiz_count
+        })
     print(f"Retrieved {len(decks)} decks from the database")
     
-    return render_template('home.html', decks=decks)
+    return render_template('home.html', decks=deck_data)
 
 
 @app.route('/add_deck', methods=['POST'])
@@ -197,6 +286,28 @@ def edit_quiz():
     # Redirect to the page displaying the deck with the updated quizzes
     return redirect(url_for('deck_page', deck_id=quiz.deck_id))
 
+@app.route('/get_next_question', methods=['GET'])
+def get_next_question():
+    global current_question_index
+    print(f"Current question index: {current_question_index}")
+    # Fetch all questions, assuming they are ordered by id
+    questions = Quiz.query.all()
+
+    # Check if there are any more questions available
+    if current_question_index < len(questions):
+        next_question = questions[current_question_index]
+        current_question_index += 1  # Move to the next question
+        return jsonify({
+            'question': next_question.question,
+            'id': next_question.id,
+            'total_questions': len(questions)
+        })
+    else:
+        print("No more questions available")  # Debugging line
+        # No more questions available
+        #return jsonify({'message': 'No more questions available'}), 404
+
+
 @app.route('/api/quizzes/<int:deck_id>')
 def get_quizzes(deck_id):
     quizzes = Quiz.query.filter_by(deck_id=deck_id).all()
@@ -206,167 +317,17 @@ def get_quizzes(deck_id):
         'answer': quiz.answer
     } for quiz in quizzes
     ])
-# @app.route('/decks/<int:deck_i>', methods=['POST','DELETE'])
-# def delete_deckZEW(deck_id):
-#     deck = Deck.query.get(deck_id)
-#     if not deck:
-#         return jsonify({'error': 'Deck not found'}), 404
 
-#     db.session.delete(deck)
-#     db.session.commit()
-#     return jsonify({'message': 'Deck deleted'}), 200
-
-
-# @app.route('/add_quiz/<int:deck_id>')
-# def add_quiz(deck_id):
-#     # Render the page to add a quiz for the given deck_id
-#     return render_template('add_quiz.html', deck_id=deck_id)
-
-# @app.route('/add_quiz', methods=['POST'])
-# def add_quizz():
-#     quiz_id = request.form.get('quiz_id')
-#     if quiz_id:
-#         # Process the quiz_id and add the quiz
-#         return redirect(url_for('home'))  # Redirect back to home page
-#     else:
-#         # Handle the case where quiz_id is missing
-#         return "Please enter a quiz ID"
+@app.route('/take_quiz')
+def take_quiz():
+    due_questions = Quiz.query.filter(Quiz.next_review_time <= datetime.utcnow()).all()
+    if due_questions:
+        return render_template('home.html', questions=due_questions)
+    else:
+        flash('NoQuestiosn are currently due for review.')
+        return ("success")
 
 
-# @app.route('/quiz', methods=['GET', 'POST'])
-# def get_quiz():
-#     """ handles quiz on a website """
-#     global current_question_index, total_score
-#     if request.method == 'GET':
-#         return render_template('quiz_2.html', quiz_data=quiz_data)
-#     if request.method == 'POST':
-#         selected_answer = int(request.form['answer'])
-#         if current_question_index < len(quiz_data):
-#             current_question = quiz_data[current_question_index]
-#             if selected_answer == current_question['correct_answer']:
-#                 score = current_question['points']
-#                 total_score += score
-#             else:
-#                 score = 0
-#             current_question_index +=1
-#             if current_question_index < len(quiz_data):
-#                 next_question = quiz_data[current_question_index]
-#                 return jsonify({'total_score': total_score, 'current_question_index': current_question_index, 'next_question': next_question})
-#             else:
-#                 return jsonify({'total_score': total_score, 'current_question_index': current_question_index, 'finished': True})
-#         else:
-#             return jsonify({'total_score': total_score, 'current_question_index': current_question_index, 'finished': True})
-#         # if current_question_index >= len(quiz_data):
-#         #     return redirect(url_for('quiz_complete'))
-
-# @app.route('/retake-quiz')
-def retake_quiz():
-    global current_question_index, total_score
-    current_question_index = 0
-    total_score = 0
-    return render_template('quiz_2.html', quiz_data=quiz_data)
-@app.route('/quiz-complete')
-def quiz_complete():
-    return render_template('quiz_complete.html')
-
-@app.route('/add-question', methods=['POST'])
-def add_question():
-    # Retrieve form data
-    question = request.form.get('new-question')
-    answers = []
-    
-    # Collecting dynamic answers from the form
-    for key in request.form:
-        if key.startswith('new-answer'):
-            answers.append(request.form[key])
-    
-    # Add the new question to the quiz data
-    quiz_data.append({
-        'question': question,
-        'answers': answers,
-        'correct_answer': None,  # You can set this based on user input
-        'points': 10  # Default points; you can allow the user to specify this
-    })
-
-    # Send a success response
-    return jsonify({'success': True, 'message': 'Question added successfully!'})
-
-@app.route('/quiz_management')
-def quiz_management():
-    return render_template('quiz_management.html')
-
-# @app.route('/save_quiz', methods=['POST'])
-# def save_quiz():
-#     title = request.form['title']
-#     question = request.form['question']
-#     option1 = request.form['option1']
-#     option2 = request.form['option2']
-#     option3 = request.form['option3']
-#     correct_answer = request.form['correctAnswer']
-
-
-#     quiz = Quiz(
-#         question = question,
-#         option1=option1,
-#         option2=option2,
-#         option3=option3,
-#         correct_answer = correct_answer,
-#         title=title
-#     )
-#     try:
-#         db.session.add(quiz)
-#         db.session.commit()
-#         flash('Quiz saved successfully!', 'success')
-#     except:
-#         flash('Failed to save quiz.Try again., error')
-#     return redirect('quiz_management.html')
-
-# @app.route('/get_quiz')
-# def get_quizz():
-#     quizzes = Quiz.query.all()
-#     quiz_data = []
-#     for quiz in quizzes:
-#         quiz_data.append({
-#             'id': quiz.id,
-#             'title': quiz.title,
-#             'question': quiz.question,
-#             'option1': quiz.option1,
-#             'option2': quiz.option2,
-#             'option3': quiz.option3,
-#             'correct': quiz.correct_answer,
-#         })
-#     return jsonify(quiz_data)
-
-
-# @app.route('/delete_quiz/<int:id>', methods=['DELETE'])
-# def delete_quiz(id):
-#     quiz = Quiz.query.get_or_404(id)
-#     try:
-#         db.session.delete(quiz)
-#         db.session.commit()
-#         flash('Quiz deleted successfully!', 'success')
-#         return jsonify({'message': 'Quiz deleted successfully'}), 200
-#     except:
-#         flash('Failed to delete quiz. Try again.', 'error')
-#         return jsonify({'error': 'Failed to delete quiz'}), 500 
-#     return render_template('quiz_management.html')
-
-# @app.route('/edit_quiz/int:id>', methods=['POST'])
-# def edit_quiz(id):
-#     quiz = Quiz.query.get_or404(id)
-#     quiz.question = request.form['question']
-#     quiz.option1 = request.form['option1']
-#     quiz.option2 = request.form['option2']
-#     quiz.option3 = request.form['option3']
-#     quiz.correct_answer = request.form['correctAnswer']
-#     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-#     try:
-#         db.session.commit()
-#         flash('Quiz Updated successfully')
-#     except:
-#         flash('Failed to update quiz. Try again.', 'error')
-#     return redirect(url_for('quiz_management'))
 
 
 if __name__ == '__main__':
