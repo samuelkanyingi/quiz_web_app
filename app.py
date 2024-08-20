@@ -2,6 +2,7 @@ from flask import Flask, jsonify, render_template, request, flash, session, redi
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from datetime import datetime, timedelta
+from werkzeug.security import generate_password_hash
 
 app = Flask(__name__, static_folder='static')
 app.secret_key = 'sammy'
@@ -17,7 +18,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), nullable=False)
     email = db.Column(db.String(150), nullable=False)
-    password = db.Column(db.String(150), nullable=False)
+    password = db.Column(db.String(550), nullable=False)
 
 class Deck(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -48,11 +49,17 @@ def signup():
         password = request.form.get('password')
 
         print(f"Received signup data: Username={username}, Email={email}, Password={password}")
-        #create a new instance
+        existing_person = User.query.filter((User.username == username) | (User.email == email)).first()
+        if existing_person:
+            flash('username or email already exist.Please chose a different one', 'danger')
+            return render_template('index.html')
+        
+        #create a new instance or new user
         new_user = User(username=username, email=email, password=password)
         db.session.add(new_user)
         db.session.commit()
-        #return redirect(url_for('login'))
+        flash('Signup success! Try login in', 'success')
+        return redirect(url_for('login'))
     return render_template('index.html')
 
 
