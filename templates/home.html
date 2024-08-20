@@ -147,6 +147,9 @@ button a{
         text-decoration: none;
         cursor: pointer;
        }
+       #logoutBtn {
+        color: black;
+       }
     </style>
 </head>
 <nav class="navbar">
@@ -159,11 +162,22 @@ button a{
             <li><a href="#">About</a></li>
             <li><a href="#">Contact</a></li>
             
-            <button><a href="#">Logout</a></button>
+            
+            <!-- <button><a href="{{ url_for('logout') }}">Logout Now</a></button> -->
+            <button id="logoutBtn" style="color:black; margin-right: 25px; padding: 5px 10px" >Logout</buttonn>
+
         </ul>
     </div>
 </nav>
-
+<div id="logoutModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2> Confirm logout</h2>
+        <p> Are you sure you want to logout?</p>
+        <button id="confirmLogout" class="btn btn-primary">Yes</button>
+        <button id="cancelLogout" class="btn btn-secondary">No</button>
+    </div>
+</div>
 <body>
     <div id="table-container">
         <table id="quiz-table">
@@ -334,6 +348,31 @@ button a{
         closeEditModal.onclick = function() {
             editModal.style.display = "none";
         }
+        document.addEventListener('DOMContentLoaded', function() {
+            var logoutBtn = document.getElementById('logoutBtn');
+            var logoutModal = document.getElementById('logoutModal');
+            var closeLogoutModal = document.getElementsByClassName('close')[0];
+            var confirmLogoutBtn = document.getElementById('confirmLogout');
+            var cancelLogoutBtn = document.getElementById('cancelLogout')
+            
+            //show modal when button clicked
+            logoutBtn.onclick = function() {
+                logoutModal.style.display = 'block';
+            }
+            //close modal when x is clicked
+            closeLogoutModal.onclick = function() {
+                logoutModal.style.display = 'none';
+            }
+            //close modal when no is clicked
+            cancelLogoutBtn.onclick = function() {
+                logoutModal.style.display = "none";
+            }
+            // logout when yes is clicked
+            confirmLogoutBtn.onclick = function() {
+                logoutModal.style.display = "none";
+                window.location.href = "{{ url_for('logout') }}";
+            }
+        })
         window.onclick = function(event) {
             if (event.target == editModal) {
                 editModal.style.display = "none";
