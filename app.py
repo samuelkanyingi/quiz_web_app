@@ -3,12 +3,14 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash
+from flask_bcrypt import Bcrypt
 
 app = Flask(__name__, static_folder='static')
 app.secret_key = 'sammy'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:root@localhost/quiz_db'
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+bcrypt = Bcrypt(app)
  
 
 current_question_index = 0 
@@ -45,7 +47,7 @@ with app.app_context():
 def signup():
     if request.method == 'POST':
         username = request.form.get('username')
-        email = request.form.get('password')
+        email = request.form.get('email')
         password = request.form.get('password')
 
         print(f"Received signup data: Username={username}, Email={email}, Password={password}")
@@ -54,8 +56,10 @@ def signup():
             flash('username or email already exist.Please chose a different one', 'danger')
             return render_template('index.html')
         
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        
         #create a new instance or new user
-        new_user = User(username=username, email=email, password=password)
+        new_user = User(username=username, email=email, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
         flash('Signup success! Try login in', 'success')
@@ -64,10 +68,34 @@ def signup():
 
 
 
-@app.route('/login', methods=['POST'])
+@app.route('/login', methods=['GET','POST'])
 def login():
-    return render_template('login.html')
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        print(f"Attempting login with email: {email}")
+        print(f"Provided password: {password}")
 
+        # query databse for user credentials
+        user = User.query.filter_by(email=email).first()
+        if user and bcrypt.check_password_hash(user.password, password):
+            session['user_id'] = user.id
+            flash('Login success', 'success')
+            print('Login success')
+            return redirect(url_for('home'))
+        else:
+            flash('Invalid credentials', 'danger')
+            #return redirect(url_for('login'))
+            return render_template('index.html')
+    else:
+        return render_template('index.html')
+
+#logout user
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    flash('You have been logged out.', 'success')
+    return redirect(url_for('login'))
 def get_current_question():
     # Example logic to get the latest question
     current_question = Quiz.query.order_by(Quiz.id.desc()).first()
@@ -118,9 +146,9 @@ def landing_page():
     return render_template('landing_page.html')
 
 
-@app.route('/login')
-def get_message():
-    return render_template('index.html', message="hello quiz app")
+# @app.route('/login')
+# def get_message():
+#     return render_template('index.html', message="hello quiz app")
 
 @app.route('/home')
 def home():
@@ -161,22 +189,6 @@ def add_deck():
     #return render_template('home.html')
     return redirect(url_for('home'))
 
-# @app.route('/add_deckz', methods=['POST'])
-# def add_decck():
-#     if request.method == 'POST':
-#         data = request.get_json()
-#         print(f"Received data: {data}")  # Log the received data
-#         name = data.get('name')
-#         quiz_count = data.get('quiz_count')
-#         deck = Deck(name=name, quiz_count=quiz_count)
-#         db.session.add(deck)
-#         db.session.commit()
-#         # return jsonify(new_deck.to_dict()), 201
-#         print(f"Deck added with ID: {deck.id}")
-#         return jsonify({'message': 'deck created successfully'}), 201
-#     elif request.method == 'GET':
-#         decks = Deck.query.all()
-#         return jsonify([{'id':deck.id, 'name': deck.name, 'quiz_count': quiz_count} for deck in decks])
 
 
 @app.route('/delete_deck/<int:deck_id>', methods=['POST'])
