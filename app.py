@@ -169,7 +169,7 @@ def forgot_password():
 def send_reset_email(to_email, reset_link):
     msg = Message('Password Reset Request', sender='noreply@demo.com', recipients=[to_email])
     msg.body = f''' To reset your password, Visit link below: {reset_link}
-    if you did not make this request simply ignore this email'''
+    Password expires after 1 hour. if you did not make this request simply ignore this email'''
     mail.send(msg)
     print(f'Send this link to {to_email}: {reset_link}')
 
