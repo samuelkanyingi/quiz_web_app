@@ -2,25 +2,56 @@ from flask import Flask, jsonify, render_template, request, flash, session, redi
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from datetime import datetime, timedelta
-from werkzeug.security import generate_password_hash
+#from werkzeug.security import generate_password_hash
 from flask_bcrypt import Bcrypt
+from flask_login import UserMixin, login_required, LoginManager, login_user, logout_user
+from flask_mail import Mail, Message
+import os
+from werkzeug.security import generate_password_hash
+from itsdangerous import URLSafeTimedSerializer
+import hashlib
+from flask_bcrypt import Bcrypt
+
+#from functools import wraps
+from dotenv import load_dotenv
+load_dotenv()
 
 app = Flask(__name__, static_folder='static')
 app.secret_key = 'sammy'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:root@localhost/quiz_db'
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USERNAME'] = 'samuelkanyingi2016@gmail.com'
+app.config['MAIL_PASSWORD'] = 'tkih fuut pegn eyuw'
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+mail = Mail(app)
+
 bcrypt = Bcrypt(app)
- 
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+login_manager.login_view = "login"
+serializer = URLSafeTimedSerializer(app.secret_key) #generates token
+
 
 current_question_index = 0 
 total_score = 0
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), nullable=False)
     email = db.Column(db.String(150), nullable=False)
     password = db.Column(db.String(550), nullable=False)
+
+class PasswordResetToken(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id  =db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    token = db.Column(db.String(1256), nullable=False)
+    expires_at = db.Column(db.DateTime, nullable=False)
 
 class Deck(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -39,6 +70,10 @@ class Quiz(db.Model):
     answer = db.Column(db.String(255), nullable=False)
     deck_id = db.Column(db.Integer, db.ForeignKey('deck.id'), nullable=True)
     next_review_time = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
+
+@login_manager.user_loader
+def load_user(id):
+    return User.query.get(id)
 
 with app.app_context():
     db.create_all()
@@ -79,7 +114,7 @@ def login():
         # query databse for user credentials
         user = User.query.filter_by(email=email).first()
         if user and bcrypt.check_password_hash(user.password, password):
-            session['user_id'] = user.id
+            login_user(user)
             flash('Login success', 'success')
             print('Login success')
             return redirect(url_for('home'))
@@ -92,16 +127,80 @@ def login():
 
 #logout user
 @app.route('/logout')
+@login_required
 def logout():
-    session.pop('user_id', None)
+    # session.pop('user_id', None)
+    logout_user()
     flash('You have been logged out.', 'success')
-    return redirect(url_for('login'))
+    return redirect(url_for('landing_page'))
+
+
 def get_current_question():
     # Example logic to get the latest question
     current_question = Quiz.query.order_by(Quiz.id.desc()).first()
     if current_question:
         return current_question
     return None
+
+
+@app.route('/forgot_password', methods=['POST'])
+def forgot_password():
+    data = request.get_json()
+    email = data.get('email')
+
+    user = User.query.filter_by(email=email).first()
+    #check if user exists
+    if user:
+        token = serializer.dumps(email, salt='password-reset-salt')
+        hashed_token = hashlib.sha256(token.encode()).hexdigest()
+
+        #store hashed token in dtabase with expiration time
+
+        expiration_time = datetime.now() + timedelta(hours=1)
+        reset_token = PasswordResetToken(user_id=user.id, token=hashed_token, expires_at=expiration_time)
+        db.session.add(reset_token)
+        db.session.commit()
+
+        #send email with token
+        reset_link = url_for('reset_password', token=token, _external=True)
+        send_reset_email(user.email, reset_link)
+    return jsonify({'message': 'An email has been sent if it exist in our system'})
+
+def send_reset_email(to_email, reset_link):
+    msg = Message('Password Reset Request', sender='noreply@demo.com', recipients=[to_email])
+    msg.body = f''' To reset your password, Visit link below: {reset_link}
+    if you did not make this request simply ignore this email'''
+    mail.send(msg)
+    print(f'Send this link to {to_email}: {reset_link}')
+
+@app.route('/reset_password/<token>', methods=['GET','POST'])
+def reset_password(token):
+    try:
+        email = serializer.loads(token, salt='password-reset-salt', max_age=3600)
+    except Exception as e:
+        return 'The reset link is invalid or has expired', 400
+    if request.method == 'POST':
+        new_password = request.form.get('password')
+
+        confirm_password = request.form.get('confirm_password')
+
+   
+    
+        #return 'Passwords do not match', 400
+    
+        #hash password
+        hashed_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
+
+        user = User.query.filter_by(email=email).first()
+        if user:
+            user.password = hashed_password
+            db.session.commit()
+            flash('Your password has been successfully updated', 'success')
+            return redirect(url_for('login'))
+        else:
+            return 'User not found', 404
+    return render_template('reset_password.html', token=token)
+
 
 @app.route('/get_current_question_id', methods=['GET'])
 def get_current_question_id():
@@ -151,6 +250,7 @@ def landing_page():
 #     return render_template('index.html', message="hello quiz app")
 
 @app.route('/home')
+
 def home():
     decks = Deck.query.all()
     deck_data = []
