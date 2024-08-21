@@ -4,7 +4,7 @@ from flask_migrate import Migrate
 from datetime import datetime, timedelta
 #from werkzeug.security import generate_password_hash
 from flask_bcrypt import Bcrypt
-from flask_login import UserMixin, login_required, LoginManager, login_user, logout_user
+from flask_login import UserMixin, login_required, LoginManager, login_user, logout_user, current_user
 from flask_mail import Mail, Message
 import os
 from werkzeug.security import generate_password_hash
@@ -46,6 +46,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(150), nullable=False)
     email = db.Column(db.String(150), nullable=False)
     password = db.Column(db.String(550), nullable=False)
+    decks = db.relationship('Deck', backref='owner', lazy=True) # Define the relationship to Deck
 
 class PasswordResetToken(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -58,6 +59,8 @@ class Deck(db.Model):
     name = db.Column(db.String(100), nullable=True)
     quiz_count = db.Column(db.Integer, default=0)
     title = db.Column(db.String(100), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    #user = db.relationship('User', backref=db.backref('decks', lazy=True))
     quizzes = db.relationship('Quiz',backref='deck', lazy=True)
 
     def to_dict(self):
@@ -250,28 +253,32 @@ def landing_page():
 #     return render_template('index.html', message="hello quiz app")
 
 @app.route('/home')
-
+@login_required  # Ensure the user is logged in
 def home():
-    decks = Deck.query.all()
+    user = current_user  # Get the currently logged-in user
+    decks = Deck.query.filter_by(user_id=user.id).all() # Get decks for the current user
     deck_data = []
 
     # get current date
     current_date = datetime.utcnow().date()
 
     # prepare data for each deck
-    for deck in decks:
-        quiz_count = Quiz.query.filter_by(deck_id=deck.id).count()
-        due_quiz_count = Quiz.query.filter(
-            Quiz.deck_id == deck.id,
-            Quiz.next_review_time <= datetime.utcnow()
-        ).count()
-        deck_data.append({
-            'id': deck.id,
-            'title': deck.title,
-            'quiz_count': quiz_count,
-            'due_quiz_count': due_quiz_count
-        })
-    print(f"Retrieved {len(decks)} decks from the database")
+    if decks:
+        for deck in decks:
+            quiz_count = Quiz.query.filter_by(deck_id=deck.id).count()
+            due_quiz_count = Quiz.query.filter(
+                Quiz.deck_id == deck.id,
+                Quiz.next_review_time <= datetime.utcnow()
+            ).count()
+            deck_data.append({
+                'id': deck.id,
+                'title': deck.title,
+                'quiz_count': quiz_count,
+                'due_quiz_count': due_quiz_count
+            })
+        print(f"Retrieved {len(decks)} decks from the database")
+    else:
+        flash("You have no decks.Please add a new deck")
     
     return render_template('home.html', decks=deck_data)
 
