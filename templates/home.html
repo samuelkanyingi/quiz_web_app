@@ -3,23 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- <script src="{{ url_for('static', filename='main.js') }}"></script -->
+    <!-- <script src="{{ url_for('static', filename='main.js') }}"></script> -->
     <title>Quiz Table</title>
     <style>
         body {
-    /* background-color: aqua; */
-    margin: 0;
-    padding: 0;
-}
-#signup {
-    background-color: bisque;
-    padding:20px;
-    margin-left: 400px;
-    margin-top: 100px;
-    text-align: center;
-    width: 300px;
-    align-items: center;
-    border-radius: 20px;
+            margin: 0;
+            padding: 0;
+    }
+    #signup {
+        background-color: bisque;
+        padding:20px;
+        margin-left: 400px;
+        margin-top: 100px;
+        text-align: center;
+        width: 300px;
+        align-items: center;
+        border-radius: 20px;
 }
 input[type="submit"] {
     background-color: rgb(108, 108, 204) ;
@@ -31,7 +30,8 @@ input[type="submit"] {
 
 .navbar {
     background-color: rgb(5, 5, 5);
-    float: right;
+    /* float: right; */
+    display: flex;
     font-family: 'calibri';
     width: 100%;
     margin-top: 0;
@@ -120,7 +120,7 @@ button a{
         .modal {
         display: none;
         position: fixed;
-        /* z-index: 1; */
+        z-index: 1;
         left: 0;
         top: 0;
         overflow:auto;
@@ -149,6 +149,9 @@ button a{
        }
        #logoutBtn {
         color: black;
+       }
+       #myBtn {
+        padding: 10px 20px;
        }
     </style>
 </head>
@@ -224,16 +227,15 @@ button a{
             <!-- <button id="add-row-btn" onclick="showAddPopup()">Add Row</button> -->
             
             <button id="myBtn">Add new deck</button>
+            <!--Add New Deck Modal-->
             <div id="myModal" class="modal">
                 <div class="modal-content">
-                    <span  class="close">&times;</span>
+                    <span class="close-add-deck">&times;</span>
                     <h2> Add New Quiz</h2>
-                    <p> Some text in the Modal..</p>
+                    
                     <form id="quizForm" action="/add_deck" method="post">
                         <label for="title">Enter Deck Name:</label>
-                        <input type="text" id="title" name="title" required>
-        
-                        
+                        <input type="text" id="title" name="title" required> <br>
                         <button type="submit">Save</button>
         
                     </form>
@@ -288,21 +290,31 @@ button a{
                 });
             });
         }
-        var modal = document.getElementById("myModal")
-        var btn = document.getElementById("myBtn")
-        var span = document.getElementsByClassName("close")[0];
-        var quizForm = document.getElementById('quizForm');
-        btn.onclick = function() {
-            modal.style.display = "block";
-        }
-        span.onclick = function() {
-            modal.style.display = "none";
-        }
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none"
+            var modal = document.getElementById("myModal")
+            var btn = document.getElementById("myBtn")
+            var span = document.querySelector(".close-add-deck")
+            btn.onclick = function() {
+                modal.style.display = "block";
             }
-        }
+            span.onclick = function() {
+                modal.style.display = "none";
+            }
+        
+        //var modal = document.getElementById("myModal")
+        //var btn = document.getElementById("myBtn")
+        //var span = document.getElementsByClassName("close")[0];
+        //var quizForm = document.getElementById('quizForm');
+        // btn.onclick = function() {
+        //     modal.style.display = "block";
+        // }
+        // span.onclick = function() {
+        //     modal.style.display = "none";
+        // }
+        // window.onclick = function(event) {
+        //     if (event.target == modal) {
+        //         modal.style.display = "none"
+        //     }
+        // }
         
     //document.addEventListener('DOMContentLoaded', function() {
     // Select all delete buttons
@@ -380,6 +392,7 @@ button a{
         window.onclick = function(event) {
             if (event.target == editModal) {
                 editModal.style.display = "none";
+                
             }
         }
     </script>
