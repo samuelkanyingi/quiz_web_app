@@ -164,7 +164,7 @@ button a{
             
             
             <!-- <button><a href="{{ url_for('logout') }}">Logout Now</a></button> -->
-            <button id="logoutBtn" style="color:black; margin-right: 25px; padding: 5px 10px" >Logout</buttonn>
+            <button id="logoutBtn" style="color:black; margin-right: 25px; padding: 5px 10px" >Logout</button>
 
         </ul>
     </div>
@@ -180,6 +180,7 @@ button a{
 </div>
 <body>
     <div id="table-container">
+        {% if decks %}
         <table id="quiz-table">
             <thead>
                 <tr>
@@ -214,6 +215,9 @@ button a{
             {% endfor %}
             </tbody>
         </table>
+        {% else %}
+        <p>You have No decks. Please add a new deck.</p>
+        {% endif %}
     </div>
 
     <!-- Button to trigger Add popup -->
