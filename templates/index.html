@@ -160,6 +160,19 @@
         color: black;
         text-decoration: none;
     }
+    #sucess-modal {
+        display: none;
+        margin-bottom: 20px;
+        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background*/
+        z-index: 1000; /* Ensures it appears above other elements */
+    }
+    #success-modal-ok {
+        background-color: #28a745;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 15px;;
+    }
     </style>
   
 </head>
@@ -242,7 +255,7 @@
         </div>
     </div>
     </div>
-
+<!--forgot password modal-->
     <div id="forgot-password-modal" class="modal">
         <div class = "modal-content">
             <span class="close">&times;</span>
@@ -252,6 +265,14 @@
                 <input type="email" id="email" name="email">
                 <button type="submit">Submit</button>
             </form>
+        </div>
+    </div>
+
+    <div id="success-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="success-modal-close">&times;</span>
+            <p>Reset link sent to email</p>
+            <button id="success-modal-ok">OK</button>
         </div>
     </div>
     <script>
@@ -324,12 +345,22 @@
                 body: JSON.stringify({email: email}),
             }).then(response => {
                 if (response.ok) {
-                    alert('An email has been sent if it exists')
-                    document.getElementById('forgot-passowrd-moda;').style.display = 'none';
+                    document.getElementById('forgot-password-modal').style.display = 'none';
+                    document.getElementById('success-modal').style.display = 'flex';
+                    //alert('An email has been sent if it exists')
+                    // document.getElementById('forgot-passowrd-moda;').style.display = 'none';
                     }
                 }).catch(error => {
                     console.error('Error:', error)
                 })
+                document.getElementById('success-modal-ok').onclick = function() {
+                    document.getElementById('success-modal').style.display = 'none';
+                }
+                
+                document.getElementById('success-modal-close').onclick = function() {
+                    document.getElementById('success-modal').style.display = 'none'
+                }
+               
         }
     </script>
 </body>
