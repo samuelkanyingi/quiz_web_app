@@ -197,6 +197,39 @@ button a{
        .save-deck-button:hover { 
         background-color: #45a049;
        }
+       #editForm {
+        display: flex;
+        flex-direction: column; /*stack elements vertical*/
+        align-items: center;
+        
+       }
+       #editForm label {
+        font-size: 18px;
+        margin-bottom: 5px;
+        
+       }
+       #editForm input[type="text"] {
+        width: 60%;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+       }
+       .editH2 {
+        text-align: center;
+       }
+       .edit-deck-button {
+        background-color: #3998a5;;
+        width: 60%;
+        height: 60%;
+        border: none;
+        color: white;
+        padding: 20px;
+        font-size: 20px;
+       }
+       .edit-deck-button:hover {
+        background-color: #306ba3;
+       }
+     
 
        
     </style>
@@ -280,11 +313,9 @@ button a{
                     <h2> Add New Quiz</h2>
                     
                     <form id="quizForm" action="/add_deck" method="post">
-                        <label for="title" >Enter Deck Name:</label> <br>
+                        <label for="title" >Enter Deck Name:</label> <br> <br>
                         <input type="text" id="title" name="title" placeholder="deck name"> <br>
-                        
-                      
-                            <button type="submit" class="save-deck-button">Save</button>
+                        <button type="submit" class="save-deck-button">Save</button>
                         
                         
         
@@ -297,12 +328,12 @@ button a{
     <div id="editModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h2>Edit Deck Name</h2>
+            <h2 class="editH2">Edit Deck Name</h2>
             <form id="editForm" action="/edit_deck" method="post">
                 <input type="hidden" id="edit-deck-id" name="deck_id">
-                <label for="edit-deck-title">Deck Name:</label>
-                <input type="text" id="edit-deck-title" name="title" required>
-                <button type="submit">Save</button>
+                <label for="edit-deck-title">Deck Name:</label>  <br>
+                <input type="text" id="edit-deck-title" name="title" required> <br>
+                <button type="submit" class="edit-deck-button">Save</button>
             </form>
         </div>
     </div>
