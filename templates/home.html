@@ -393,6 +393,21 @@ button a{
     </div> -->
 
     <script>
+        //wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function(){
+            //select all flash messages
+            const flashMessages = document.querySelectorAll('.flash');
+            //set timeout
+            flashMessages.forEach(function(flash){
+                setTimeout(function() {
+                    flash.style.transition = 'opacity 0.5s ease-out' //fade-out effect
+                    flash.style.opacity = "0"; //start fadeout
+                    setTimeout(function() {
+                        flash.remove(); // remove element from DOM
+                    }, 500); // wait for fadeout
+                }, 2000)
+            })
+        })
         function addCloseButtonListeners() {
             var closeButtons = document.querySelectorAll('.flash-message .close')
             closeButtons.forEach(function(button) {
