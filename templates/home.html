@@ -273,9 +273,38 @@ button a{
         background-color: #c62828;
     }
 
-     
-
-       
+     .modal-actions {
+        display: flex;
+        justify-content: space-between;
+     }
+     .btn {
+        padding: 10px 20px;
+        border: none;
+        font-size: 16px;
+        border-radius: 5px;
+        width: 25%;
+     }
+     .btn-danger {
+        background-color: #e74c3c;
+        color: #fff
+     }
+     .btn-danger:hover {
+        background-color: #c0392b;
+     }
+      .btn-secondary {
+        background-color: #44cf57;
+        color:#2c3e50
+      }
+      .btn-secondary:hover {
+        background-color: #1ac531;
+      }
+      .modal-content p {
+        font-size: 20px;
+        font-weight: bold;
+        font-family: sans-serif;
+        color: rgb(192, 72, 72);
+        margin-bottom: 40px;
+      }
     </style>
 </head>
 <nav class="navbar">
@@ -410,8 +439,11 @@ button a{
            <div id="delete-modal" class="modal">
             <div class="modal-content">
                 <p>Are you sure you want to delete the deck?</p>
-                <button id="confirm-delete-btn" class="btn btn-danger">Yes</button>
+                <div class="modal-actions">
+                    <button id="confirm-delete-btn" class="btn btn-danger">Yes</button>
                 <button id="cancel-delete-btn" class= "btn btn-secondary">No</button>
+                </div>
+                
             </div>
         </div>
     
