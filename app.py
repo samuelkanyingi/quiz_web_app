@@ -284,17 +284,21 @@ def home():
 
 
 @app.route('/add_deck', methods=['POST'])
+@login_required
 def add_deck():
-    title = request.form['title']
-
-    # Create a new deck object
-    new_deck = Deck(title=title, name='Default Name', quiz_count=0)
-    db.session.add(new_deck)
-    db.session.commit()
+    if request.method == 'POST':
+        print("Received POST request for adding a deck")
+        title = request.form['title']
+        print(f"Received title: {title}")
+        # Create a new deck object
+        new_deck = Deck(title=title, name='Default Name', quiz_count=0, user_id=current_user.id)
+        db.session.add(new_deck)
+        db.session.commit()
     
-    #return jsonify({'message': 'deck created successfully'}), 201
-    #return render_template('home.html')
-    return redirect(url_for('home'))
+        flash('Deck created successfully!', 'success')
+        return redirect(url_for('home'))
+    else:
+        return render_template('home.html')
 
 
 

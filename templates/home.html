@@ -229,6 +229,25 @@ button a{
        .edit-deck-button:hover {
         background-color: #306ba3;
        }
+       .flash-messages {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+    .flash-success {
+    background-color: green;
+    color: white;
+    border: 1px solid #c3e6cb;
+    text-align: center;
+    font-family: sans-serif;
+    font-size: large;
+    }
+    .flash {
+        margin-bottom: 0;
+        padding: 8px;
+        border-radius: 5px;
+    }
+    
+
      
 
        
@@ -261,6 +280,18 @@ button a{
     </div>
 </div>
 <body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-messages">
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
     <div id="table-container">
         {% if decks %}
         <table id="quiz-table">
