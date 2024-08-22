@@ -246,7 +246,12 @@ button a{
         padding: 8px;
         border-radius: 5px;
     }
-    
+    .edit-btn {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+    }
 
      
 
@@ -319,9 +324,9 @@ button a{
                         <!-- <a href="{{ url_for('delete_deck', deck_id=deck.id) }}" onclick="return confirm('Are you sure you want to delete this deck?')">Delete</a> -->
                         <form id="quizForm" action="{{ url_for('delete_deck', deck_id=deck.id) }}" method="post" style="display:inline;">
                         
-                            
-                            <button type="submit">Delete</button>
-            
+                            <!--delete button-->
+                            <button type="submit" id="delete-deck-btn" class="delete-btn" data-deck-id="{{ deck.id }}">Delete</button>
+                     
                         </form>
                     </td>
                 </tr>
@@ -347,9 +352,6 @@ button a{
                         <label for="title" >Enter Deck Name:</label> <br> <br>
                         <input type="text" id="title" name="title" placeholder="deck name"> <br>
                         <button type="submit" class="save-deck-button">Save</button>
-                        
-                        
-        
                     </form>
         
                 </div>
@@ -380,17 +382,15 @@ button a{
         </div>
     </div>
 
-    <!--Popup for editing a deck -->
-    <!-- <div id="editPopup" class="popup">
-        <div class="popup-content">
-            <h2>Edit Deck Name</h2>
-            <input type="text" id="edit-deck-name-input" placeholder="Enter new deck name">
-            <div class="button-group">
-                <button class="save-button" onclick="saveEditedDeck()">Save</button>
+           <!--Confirmation Modal-->
+           <div id="delete-modal" class="modal">
+            <div class="modal-content">
+                <p>Are you sure you want to delete the deck?</p>
+                <button id="confirm-delete-btn" class="btn btn-danger">Yes</button>
+                <button id="cancel-delete-btn" class= "btn btn-secondary">No</button>
             </div>
-            <button class="cancel-button" onclick="closePopup('editPopup')">Cancel</button>
         </div>
-    </div> -->
+    
 
     <script>
         //wait for DOM to be fully loaded
@@ -407,6 +407,78 @@ button a{
                     }, 500); // wait for fadeout
                 }, 2000)
             })
+            const deleteButtons = document.querySelectorAll('.delete-btn');
+            const modals = document.getElementById('delete-modal')
+            const confirmDeleteButton = document.getElementById('confirm-delete-btn')
+            const cancelDeleteButton = document.getElementById('cancel-delete-btn')
+            
+            let deckIdToDelete = null; // Variable to store the ID of the deck to delete
+            //open delete modal when delete button is clicked
+            deleteButtons.forEach(function(button) {
+                button.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    console.log('Clicked button:', this); // Log the button element
+                    deckIdToDelete = this.getAttribute('data-deck-id'); // Get the deck ID from the clicked button
+                    console.log('Deck ID to delete:', deckIdToDelete); // Log the deck ID
+                    modals.style.display = "block"; // show modal
+                });
+            })
+            // close modal when No is clicked
+            cancelDeleteButton.addEventListener('click', function() {
+                modals.style.display = 'none'; //hide modal
+            })
+            //handle delection action when confirm button is clicked
+            confirmDeleteButton.addEventListener('click', function() {
+                console.log('Confirm delete clicked for Deck ID:', deckIdToDelete); // Log confirmation
+                if (deckIdToDelete) {
+                    deleteDeck(deckIdToDelete)
+                    modals.style.display = 'none';
+                }
+
+            })
+            function showFlashMessage(message, type) {
+                
+                const flashContainer = document.getElementById('flash-messages');
+                if (!flashContainer) {
+                    location.reload();
+                    
+                }
+                const flashMessage  = document.createElement('div');
+                    flashMessage.className = `flash flash-${type}`;
+                    flashMessage.textContent = message;
+                    flashContainer.appendChild(flashMessage)
+                    
+                    setTimeout(() => {
+                        flashMessage.style.transition.opacity = '0'
+                        setTimeout(()=> flashMessage.remove(), 500)
+                    }, 1000)
+                }
+                
+            
+            //function to delete deck
+            function deleteDeck(deckId) {
+                //make API Call to server
+                console.log('Deleting Deck ID:', deckId);
+                fetch(`/delete_deck/${deckId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('deck deleted')
+                        showFlashMessage('Deck deleted successfully', 'success')
+                        
+                        //remove element from dom
+                    }
+                    else {
+                        showFlashMessage('Failed to delete deck', 'error')
+                    }
+                })
+                .catch(error => console.error('Error:', error))
+            }
         })
         function addCloseButtonListeners() {
             var closeButtons = document.querySelectorAll('.flash-message .close')
@@ -427,25 +499,10 @@ button a{
                 modal.style.display = "none";
             }
         
-        //var modal = document.getElementById("myModal")
-        //var btn = document.getElementById("myBtn")
-        //var span = document.getElementsByClassName("close")[0];
-        //var quizForm = document.getElementById('quizForm');
-        // btn.onclick = function() {
-        //     modal.style.display = "block";
-        // }
-        // span.onclick = function() {
-        //     modal.style.display = "none";
-        // }
-        // window.onclick = function(event) {
-        //     if (event.target == modal) {
-        //         modal.style.display = "none"
-        //     }
-        // }
-        
+       
     //document.addEventListener('DOMContentLoaded', function() {
     // Select all delete buttons
-    const deleteButtons = document.querySelectorAll('.delete-button');
+    //const deleteButtons = document.querySelectorAll('.delete-button');
 
     // Add click event listener to each delete button
     // deleteButtons.forEach(button => {
