@@ -4,13 +4,77 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz page</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
 
     <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        li {
+    list-style-type: none;
+    display: inline-block;
+        }
+    li a {
+    color: rgb(233, 232, 232);
+    font-size: 20px;
+    font-weight: bold;
+    margin-right: 21px;
+    text-decoration: none;
+}
+.logo a {
+    font-weight: 600;
+    color: antiquewhite;
+    font-size: 40px;
+    text-decoration: none;
+}
+.navbar {
+    background-color: rgb(5, 5, 5);
+    float: right;
+    font-family: 'calibri';
+    width: 100%;
+    margin-top: 0;
+    margin-bottom: 50px;
+    /* padding: 10px 0; */
+}
+#login, #signup {
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    margin: 15px;
+    
+    margin-right: 10px;
+}
+.navbardiv{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 1px;
+}
+
+ul li {
+    padding-right: 120px;
+    
+}
+#login a, #signup a{
+
+    text-decoration: none;
+}
+#delete {
+    background-color: #45a050;
+    float: right;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 0 10px;
+}
         #table-container {
             background-color: #ee6969;
             margin: 0 auto;
-            padding: 20px;
+            padding-top: 20px;
             border-radius: 5px;
             box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
             transition: max-height 0.3s ease;
@@ -149,7 +213,7 @@
     width: 30%;
 
 }
-#deleteConfirmatiomModal h2 {
+#deleteConfirmationModal h2 {
     font-size: 18px;
 }
 #deleteConfirmationModal .confirm-btn,
@@ -176,11 +240,72 @@
     background-color: #f44336;
     margin-left: 5px;
 }
+
+.button-container {
+    display: block;
+    gap: 20px;
+}
+.button-container button {
+    background-color: #007bff;
+    color: white;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    margin-left: 8px;
+}
+.button-container button:hover {
+    background-color: #0056b3;
+}
+#addQuizBtn:hover {
+    background-color: #45a049;
+}
+td {
+    padding: 12px 15px;
+    border-bottom: 1px solid black;
+    color: #333;
+    font-size: 16px;
+}
+td.quiz-question {
+    font-weight: bold;
+    font-size: 20px;
+
+}
+td.quiz-answer {
+    font-style: italic;
+    font-weight: 700;
+    font-size: 18px;
+}
+.eye-icon {
+    margin-left: 10px;
+    font-size: 18px;
+    cursor: pointer;
+}
+.eye-icon i {
+    color: #333;
+}
+.answer-text {
+    display: none;
+}
     </style>
 </head>
 <body>
-    <h1>{{ deck.title }}</h1>
-<p>This deck is currently empty.</p>
+    <nav class="navbar">
+    <div class="navbardiv">
+        <div class="logo">
+            <a href="#">Quiz App</a>
+        </div>
+        <ul>
+            <li><a href="#">Home</a></li>
+            <li><a href="/templates/home.html">About</a></li>
+            <li><a href="#">deck</a></li>
+            <!-- <button id="login"><a href="#">logout</a></button> -->
+            <button id="logoutBtn" style="color:black; margin-right: 25px; padding: 5px 10px" >Logout</button>
+        </ul>
+    </div>
+</nav>
+
+    
 <!-- <button id="addQuizBtn">Add Quiz</button> -->
  <div class="button-container">
         <button id="addQuizBtn">Add new quiz</button>
@@ -199,14 +324,20 @@
             <tbody id="tableBody">
                 {% for quiz in quizzes %}
                 <tr>
-                    <td>{{ quiz.question }}</td>
-                    <td>{{ quiz.answer }}</td>
+                    <td class="quiz-question">{{ quiz.question }}</td>
+                    <!-- <td class="quiz-answer">{{ quiz.answer }} -->
+                        <td>
+                        <span class="answer-text">{{ quiz.answer }}</span>
+                        <span class="eye-icon" onclick=toggleAnswerVisiblity(this)>
+                            <i class="fa fa-eye"></i>    
+                        </span>
+                    </td>
                     <td>
                         <!-- Edit Button -->
-                        <button class="edit-btn" data-quiz-id="{{ quiz.id }}" data-question="{{ quiz.question }}" data-answer="{{ quiz.answer }}">Edit</button>
+                        <button class="edit" data-quiz-id="{{ quiz.id }}" data-question="{{ quiz.question }}" data-answer="{{ quiz.answer }}">Edit</button>
                         <!-- Delete Button -->
                         <form action="{{ url_for('delete_quiz', quiz_id=quiz.id) }}" method="post"  class="inline-delete">
-                            <button type="submit">Delete</button>
+                            <button id="delete" type="submit">Delete</button>
                         </form>
                     </td>
                 </tr>
@@ -271,6 +402,19 @@
  </div>
 
 <script>
+function toggleAnswerVisiblity(iconElement) {
+     // Get the answer text element (previous sibling of the eye icon)
+    var answerText = iconElement.previousElementSibling;
+    console.log(answerText);
+    if (answerText.style.display === 'none') {
+        answerText.style.display = "block";
+        iconElement.innerHTML = '<i class="fa fa-eye-slash"></i>' // Change icon to "eye-slash"
+    }
+    else {
+        answerText.style.display = 'none';
+        iconElement.innerHTML = '<i class="fa fa-eye"></i>' // change to eye
+    }
+}
 // Add quiz modal
 var addQuizModal = document.getElementById("addQuizModal");
 var addQuizBtn = document.getElementById("addQuizBtn");
@@ -295,7 +439,8 @@ document.getElementById("addMoreQuizBtn").onclick = function() {
 // edit Quiz Modal
 var editQuizModal = document.getElementById("editModal");
 var closeEditQuizModal = document.getElementById("closeEditModal");
-document.querySelectorAll('.edit-btn').forEach(function(button) {
+
+document.querySelectorAll('.edit').forEach(function(button) {
     button.addEventListener('click', function() {
         var quizId = this.getAttribute('data-quiz-id');
         var question = this.getAttribute('data-question');
@@ -338,6 +483,16 @@ let quizzes = [];
     var modalContent =  takeQuizModal.querySelector('.modal-content');
     modalContent.innerHTML = ''; // clear previos content
 
+     // Check if there are questions available
+     if (quizzes.length === 0) {
+        // Display a message or handle the case where no questions are available
+        var noQuestionsMessage = document.createElement('p');
+        noQuestionsMessage.textContent = 'No questions available.';
+        noQuestionsMessage.classList.add('no-questions-message'); // Add CSS class
+        modalContent.appendChild(noQuestionsMessage);
+        return; // Exit the function
+    }
+
     // create and style progress bar container
     var progressContainer = document.createElement('div')
     progressContainer.classList.add('progress-container'); // add css
@@ -363,7 +518,7 @@ let quizzes = [];
         var questionE1 = document.createElement('p');
         questionE1.textContent = `q${currentQuestionIndex + 1}: ${quiz.question}`;
         questionE1.classList.add('question'); // add CSS class
-        
+        questionE1.dataset.questionId = currentQuestionIndex; //set data-question-id
         // Create answer element
         var answerE1 = document.createElement('p');
         answerE1.textContent = `Answer: ${quiz.answer}`;
@@ -422,13 +577,13 @@ let quizzes = [];
             cebrationMessage.style.display = 'none'
         }, 5000);
         modalContent.appendChild(doneBtn);
-        runCofetti();
+        runConfetti();
 
     }
    
 }
 
-function runCofetti() {
+function runConfetti() {
     confetti({
         particleCount: 100,
         spread: 70,
@@ -463,7 +618,7 @@ document.querySelectorAll('form.inline-delete button[type="submit"]').forEach(fu
     button.addEventListener('click', function(event) {
         //prevent form to submit
         event.preventDefault();
-
+        
         // show confirmation modal
         deleteConfirmationModal.style.display = "block";
 
@@ -507,55 +662,108 @@ function showFeedbackButtons() {
     // var buttons = ["Again", "Hard", "Good", "Easy"]; //labels to hold buttons
     feedbackContainer.id = 'feedback-container';
 
-    const againBtn = document.createElement('button');
-    againBtn.textContent = 'Again';
-    const hardBtn = document.createElement('button');
-    hardBtn.textContent = 'Hard';
-    const goodBtn = document.createElement('button');
-    goodBtn.textContent = 'Good';
-    const easyBtn = document.createElement('button');
-    easyBtn.textContent = 'Easy';
+     const textLabel = document.createElement('label');
+    //textLabel.textContent = '<1min';
 
-    // Append buttons to the container
-    feedbackContainer.appendChild(againBtn);
-    feedbackContainer.appendChild(hardBtn);
-    feedbackContainer.appendChild(goodBtn);
-    feedbackContainer.appendChild(easyBtn);
+    // create and style feedback buttons
+    const buttons = [
+        { text: 'Again', delay: 60000 },     // 1 minute
+        { text: 'Hard', delay: 120000 },     // 2 minutes
+        { text: 'Good', delay: 300000 },     // 5 minutes
+        { text: 'Easy', delay: 600000 }      // 10 minutes
+    ];
+ 
 
-    const modalContent = document.querySelector('#takeQuizModal .modal-content');
-    if (modalContent) {
-        modalContent.appendChild(feedbackContainer);
-    } else {
-        console.error('Modal content not found');
-    }
-    // Append the container to the document
-    // document.body.appendChild(feedbackContainer);
-    // iterate through and create feedback buttons
-    // buttons.forEach(function(text) {
-    //     var button = document.createElement('button');
-    //     button.textContent = text;
-    //     button.classList.add('feedback-btn');
-    //     button.onclick = function () {
-    //         quizFeedback[text.toLowerCase()]++;
-    //         handleFeedback(text);
-    //     };
-    //     modalContent.appendChild(button)
-    // });
-    //append contianer to modal
-    // modalContent.appendChild(showFeedbackContainer);
 
+    buttons.forEach(buttonInfo => {
+        const button = document.createElement('button');
+        button.textContent = buttonInfo.text;
+        button.dataset.delay = buttonInfo.delay; // Set delay time in button's dataset
+        feedbackContainer.appendChild(button);
+    });
+ 
+
+    fetch('/get_current_question_id')
+        .then(response => response.json())
+        .then(data => {
+            if (data.id) {
+                const currentQuestionId = data.id;
+                console.log('Current Question ID:', currentQuestionId);
+
+                feedbackContainer.querySelectorAll('button').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const delayTime = parseInt(button.dataset.delay, 10); // Get delay time from button's dataset
+                        handleFeedback(delayTime, currentQuestionId)
+                            .then(() => loadNextQuestion()); // After feedback, load the next question
+                    });
+                });
+            } else {
+                console.error('Failed to retrieve current question ID');
+            }
+        })
+
+    
+  
+
+    .catch(error => {
+        console.error('Error:', error);
+    });
 }
-function handleFeedback(feedback) {
-    if (feedback == 'Again') {
-        // do something
+
+function handleFeedback(delayTime, questionId) {
+    // const currentQuestionId = document.querySelector('.question').dataset.questionId;
+    //const currentQuestionId = document.querySelector('.question').dataset.questionId;
+    console.log('Question ID for update:', questionId);
+    //console.log('Current Question ID:', currentQuestionId); // Debug statement
+    // if (currentQuestionId) {
+    //     sessionStorage.setItem('currentQuestionId', currentQuestionId);
+    // }
+    //
+    // hide question
+    const questionElement = document.querySelector('#takeQuizModal p')
+    if (questionElement) {
+        questionElement.style.display = 'none';
     }
-    else if (feedback == 'Hard') { 
-        //do something
-    }
-    else if (feedback === 'Easy') {
-        //do something
-    }
+    //send the delay time to backend to updat equestion review time
+    return fetch('/update_next_review_time', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            id: questionId,
+            delay_time: delayTime // send delay time in milliseconds
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('Next review time updated successfully');
+            loadNextQuestion();  // Load the next question after feedback is handled
+        } else {
+            console.error('Failed to update next review time');
+        }
+    })
 }
+
+function loadNextQuestion() {
+    fetch('/get_next_question')
+    .then(response => response.json())// Ensure the server is returning JSON
+    .then(data => {
+        if (data.question) {
+            console.log('Next question:', data.question);
+            document.querySelector('#takeQuizModal .question').textContent = data.question;
+            document.querySelector('#takeQuizModal .answer').textContent = `Answer: ${data.answer}`;
+        } else {
+            console.log('Next question:', data.question)
+            document.querySelector('#takeQuizModal p').textContent = data.question;
+        }
+    })
+    .catch(error => {
+            console.error('Error fetching next question:', error);
+        });
+}
+
 
 // Handle clicks outside of modals
 window.onclick = function(event) {
@@ -572,5 +780,6 @@ window.onclick = function(event) {
 };
 
 </script>
+
 </body>
 </html>
