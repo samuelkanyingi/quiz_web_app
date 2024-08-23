@@ -1,18 +1,73 @@
+.flash-message {
+    position:fixed;
+    /* margin-top: 60px; */
+   
+    width: 100%;
+    color:#5eda73;
+    padding: 10px;
+    text-align: center;
+    display: none;
+    width: 100%;
+    text-align: center;
+    
+}
+.alert-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    
+}
+.alert {
+    margin-top: 50px;
+    padding: 10px;
+    border:none;
+    border-radius: 5px;
+    width: 100%;
+
+}
+.alert-success {
+    background-color: #58eb1e;
+    color: white;
+    font-family: serif;
+    font-size: 20px;
+    font-weight: 600;
+}
+.alert-info {
+    background-color: #1f98d4;
+    border-color: #bce8f1;
+    color: #31708f
+}
+.article h1 {
+    font-size: 36px;
+    color: #333;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    margin-bottom: 20px;
+    text-align: center;
+}
+.article p {
+    font-size: 18px;
+    color: #666;
+    margin-bottom: 20px;
+    line-height: 1.6;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+.article ul {
+    margin: 20px 0;
+    padding: 0 20px;
+    list-style-type: disc;
+    font-size: 18px;
+    color: #444;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+.article ul li {
+    margin-bottom: 10px;
+}
+
 body {
-    /* background-color: aqua; */
     margin: 0;
     padding: 0;
 }
-#signup {
-    background-color: bisque;
-    padding:20px;
-    margin-left: 400px;
-    margin-top: 100px;
-    text-align: center;
-    width: 300px;
-    align-items: center;
-    border-radius: 20px;
-}
+
 input[type="submit"] {
     background-color: rgb(108, 108, 204) ;
     border: none;
@@ -20,15 +75,14 @@ input[type="submit"] {
     padding: 10px 20px;
 }
 
-
 .navbar {
     background-color: rgb(5, 5, 5);
     float: right;
     font-family: 'calibri';
     width: 100%;
     margin-top: 0;
-    margin-bottom: 50px;
-    /* padding: 10px 0; */
+    margin-bottom: 15px;
+
 }
 .navbardiv{
     display: flex;
@@ -68,7 +122,6 @@ button a{
 }
 .article {
     margin-left: 50px;
-    /* background-color: rgb(243, 248, 248) ; */
     width: 100%; 
     
 }
@@ -89,11 +142,11 @@ button a{
 .try-now-btn {
     width: 20%;
     margin-left: 20px;
-    font-size: 18px; */
-    background-color: yellow;
+    font-size: 18px; 
+    background-color: #58eb1e;
     border: none;
     color: black;
-    padding: 25px 30px;
+    padding: 15px 15px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
@@ -102,4 +155,44 @@ button a{
     margin-right: 20px;
     border-radius: 5px;
     cursor: pointer;
+}
+.try-now-btn:hover {
+    background-color: #46c517;
+}
+
+.form-container {
+    text-align: center;
+}
+.toggle-button {
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+.toggle-button button {
+    background-color: #007bff;
+    border: none;
+    color: white;
+    border-radius: 4px;
+}
+.marquee {
+    width: 100%;
+    overflow: hidden;
+    color:#e95d5d;
+    
+}
+.marquee p {
+    display: inline-block;
+    white-space: nowrap;
+    animation: scroll 15s linear infinite;
+    font-size: 18px;
+    font-weight: 600;
+}
+@keyframes scroll {
+    0% {
+        transform: translateX(100%);  /* Starts off-screen on the right */
+    }
+    100% { 
+        transform: translateX(-100%);  /* Ends off-screen on the left */
+    }
+}
+
 }
