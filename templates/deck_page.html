@@ -63,14 +63,7 @@ ul li {
 
     text-decoration: none;
 }
-#delete {
-    background-color: #45a050;
-    float: right;
-    border: none;
-    border-radius: 5px;
-    padding: 10px;
-    margin: 0 10px;
-}
+
         #table-container {
             background-color: #ee6969;
             margin: 0 auto;
@@ -135,12 +128,16 @@ ul li {
 
 /* Styling for the dynamic answer */
 .answer {
+    display: inline-block;
+    vertical-align: top;
     font-size: 16px;
     color: #333;
-    margin-bottom: 15px;
+    margin-left: 10px;
 }
 /* Styling for the dynamic buttons */
 .show-answer-btn, .next-question-btn {
+    float: left;
+  
     background-color: #4CAF50;
     color: white;
     padding: 10px 20px;
@@ -225,22 +222,31 @@ ul li {
     border-radius: 5px;
 }
 #feedback-container { 
-    margin-top: 20px;
+    display: block;
     justify-content: space-around;
+    
+    margin-top: 80px;
+    
+    
 }
 #feedback-container button {
+    
     background-color: #4CAF50;
     color: white;
     border: none;
     padding: 10px 20px;
     border-radius: 5px;
     margin: 0 5px;
+    
 }
 #feedback-container button:nth-child(1) {
     background-color: #f44336;
     margin-left: 5px;
 }
-
+#feedback-container label {
+    font-weight: bold;
+    font-size: 18px;
+}
 .button-container {
     display: block;
     gap: 20px;
@@ -287,6 +293,34 @@ td.quiz-answer {
 .answer-text {
     display: none;
 }
+.td-btn-container {
+    display: flex;
+    gap: 10px;
+}
+.edit {
+    background-color: #45a050;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    margin: 4px 2px;
+}
+.edit:hover {
+    background-color: #308033;
+}
+.delete {
+    background-color: #f44336;
+    float: right;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    margin: 4px 2px;
+}
+.delete:hover {
+    background-color: #e6312e;
+}
+#question, #answer {
+    padding: 10px;
+}
     </style>
 </head>
 <body>
@@ -297,8 +331,8 @@ td.quiz-answer {
         </div>
         <ul>
             <li><a href="#">Home</a></li>
-            <li><a href="/templates/home.html">About</a></li>
-            <li><a href="#">deck</a></li>
+            <li><a href="{{ url_for('home') }}">Deck</a></li>
+            <li><a href="#">About</a></li>
             <!-- <button id="login"><a href="#">logout</a></button> -->
             <button id="logoutBtn" style="color:black; margin-right: 25px; padding: 5px 10px" >Logout</button>
         </ul>
@@ -333,12 +367,18 @@ td.quiz-answer {
                         </span>
                     </td>
                     <td>
+                    <div class="td-btn-container">
                         <!-- Edit Button -->
-                        <button class="edit" data-quiz-id="{{ quiz.id }}" data-question="{{ quiz.question }}" data-answer="{{ quiz.answer }}">Edit</button>
+                        <button class="edit" data-quiz-id="{{ quiz.id }}" data-question="{{ quiz.question }}" data-answer="{{ quiz.answer }}">
+                            <i class="fas fa-edit"></i>
+                        </button>
                         <!-- Delete Button -->
                         <form action="{{ url_for('delete_quiz', quiz_id=quiz.id) }}" method="post"  class="inline-delete">
-                            <button id="delete" type="submit">Delete</button>
+                            <button class="delete" type="submit">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
                         </form>
+                    </div>
                     </td>
                 </tr>
                 {% endfor %}
@@ -350,7 +390,7 @@ td.quiz-answer {
 <div id="addQuizModal" class="modal">
     <div class="modal-content">
         <span class="close"  id="closeAddQuizModal">&times;</span>
-        <h2>Add Quiz</h2>
+        <h2>Add Quiz Form</h2>
         <form id="addQuizForm" method="POST" action="{{ url_for('add_quiz', deck_id=deck.id) }}">
             <input type="hidden" name="deck_id" value="{{ deck.id }}">
             <label for="question">Question:</label> <br>
@@ -387,8 +427,11 @@ td.quiz-answer {
         <span class= "close" id="closeTakeQuizModal">&times;</span>
         <h2>Take quiz</h2>
         <p>Quiz content goes here</p>
-       
+        <div id="feedback-container"></div>
     </div>
+   
+    
+
 </div>
 
 <!-- Delete Confirmation modal -->
@@ -533,15 +576,17 @@ let quizzes = [];
             if(answerE1.style.display === 'block')  {
                 answerE1.style.display = 'none';
                 showAnswerBtn.textContent = 'Show Answer';
+                
             } else {
                 answerE1.style.display = 'block';
                 showAnswerBtn.textContent = 'Hide Answer';
-                showFeedbackButtons();
+                //showFeedbackButtons();
             }
         }
-        //     answerE1.style.display = 'block'
-        //     showFeedbackButtons();  
-        // };
+        
+            // answerE1.style.display = 'block'
+           // showFeedbackButtons();  
+    
 
         // button to move to next question
         var nextQuestionBtn = document.createElement('button');
@@ -556,18 +601,38 @@ let quizzes = [];
         modalContent.appendChild(answerE1);
         modalContent.appendChild(nextQuestionBtn);
 
-
+        showFeedbackButtons();
     } else {
         // no more questions left
         modalContent.innerHTML = '<p><center><h2>Congrats You are finished studying  &#127881 </h2></center> </p>'
         var doneBtn = document.createElement('button');
         doneBtn.textContent = "Done";
         doneBtn.classList.add('done-btn');
-
-        doneBtn.onclick = function () {
-            takeQuizModal.style.display = 'none'; //close modal with done button
+        doneBtn.onclick = async function () {
+        takeQuizModal.style.display = 'none'; //close modal with done button
+            
+    //         fetch('/complete_quiz', {
+    //     method: 'POST',
+    //     body: JSON.stringify({ quiz_id: 1 }),  // Replace with actual quiz ID
+    //     headers: {
+    //         'Content-Type': 'application/json'
+    //     }
+    // }).then(response => response.json())
+    // .then(data => {
+    //     if (data.status === 'success') {
+    //         // Redirect to a different page after successful update
+    //         location.href = '/home';  // Redirect to the home page with updates
+    //     } else {
+    //         console.error('Failed to complete quiz:', data.message);
+    //     }
+    // }).catch(error => {
+    //     console.error('Error:', error);
+    // });
+            
+            
             setTimeout(function() {
-                window.location.href = '/decks'; //redirect to deck page called home.html
+                
+                location.reload(true) //redirect to deck page called home.html
             }, 2000)
         }
         var cebrationMessage = document.createElement('celebration')
@@ -643,45 +708,66 @@ confirmDeleteBtn.onclick = function() {
 };
 
 
-function showFeedbackButtons() {
-    // Check if the feedback buttons already exist by searching for the container by ID
-    let existingContainer = document.getElementById('feedback-container');
-      
-    //var modalContent = takeQuizModal.querySelector('.modal-content');
-    if (document.getElementById('feedback-container')) {
-            return;
-    }
+function showFeedbackButtons(modalContent) {
+    const existingContainer = document.getElementById('feedback-container');
     if (existingContainer) {
         return; // If it already exists, stop the function from adding more buttons
     }
+    const takeQuizModal =document.getElementById('takeQuizModal')
+    var modalContent = takeQuizModal.querySelector('.modal-content');
+    // if (existingContainer) {
+    //     return; // If it already exists, stop the function from adding more buttons
+    // }
+    // create and style feedback buttons
     const feedbackContainer = document.createElement('div');
+    feedbackContainer.id = 'feedback-container'
+    feedbackContainer.classList.add('feedback-buttons')
+
+    
+
+    
 
     // create aand style  feedback container
     var showFeedbackContainer = document.createElement('div');
     showFeedbackContainer.classList.add('feedback-buttons');
-    // var buttons = ["Again", "Hard", "Good", "Easy"]; //labels to hold buttons
     feedbackContainer.id = 'feedback-container';
 
-     const textLabel = document.createElement('label');
-    //textLabel.textContent = '<1min';
+
 
     // create and style feedback buttons
     const buttons = [
-        { text: 'Again', delay: 60000 },     // 1 minute
-        { text: 'Hard', delay: 120000 },     // 2 minutes
-        { text: 'Good', delay: 300000 },     // 5 minutes
-        { text: 'Easy', delay: 600000 }      // 10 minutes
+        { text: 'Again', delay: 60000 + 60000},     // 2 minute
+        { text: 'Hard', delay:  60000 + 120000},     // 3 minutes
+        { text: 'Good', delay:  60000 + 180000},     // 4 minutes
+        { text: 'Easy', delay:  60000 + 240000}      // 5 minutes
     ];
  
 
 
     buttons.forEach(buttonInfo => {
+        const container = document.createElement('div')
+        container.style.display = 'inline-block';
+        container.style.marginRight = '20px';
+        const label = document.createElement('label')
+        label.textContent = `Review in ${buttonInfo.delay / 60000} minutes`;
+        label.style.display = 'block';
+        label.style.marginBottom = '10px';
+
         const button = document.createElement('button');
         button.textContent = buttonInfo.text;
         button.dataset.delay = buttonInfo.delay; // Set delay time in button's dataset
-        feedbackContainer.appendChild(button);
+        button.addEventListener('click', function() {
+            
+            this.disabled = true;
+            
+        });
+        // feedbackContainer.appendChild(label)
+        // feedbackContainer.appendChild(button);
+        container.appendChild(label)
+        container.appendChild(button)
+        feedbackContainer.appendChild(container)
     });
- 
+    modalContent.appendChild(feedbackContainer)
 
     fetch('/get_current_question_id')
         .then(response => response.json())
