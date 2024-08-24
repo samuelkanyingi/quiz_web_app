@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>contact form</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='favicon_io/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon_io/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon/favicon-16x16.png') }}">
+ 
+</head>
+<style>
+    body {font-family: Arial, Helvetica, sans-serif;}
+    .container {
+        max-width: 600px;
+        padding: 20px;
+        margin: auto;
+    }
+    form {display: flex; flex-direction: column;}
+    button {
+        padding: 10px;
+        background-color: #0077b0;
+        color: white;
+        border: none;
+        font-size: 16px;
+    }
+    button:hover { 
+        background-color: #014c6e;
+    }
+    .flash {
+        padding: 10px;
+        border-radius: 5px;
+    }
+    .flash.success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    .flash.error {
+        background-color:   #f8d7da;
+        color: #721c24;
+    }
+</style>
+<body>
+    <div class="container">
+    <h1>Contact Us</h1>
+    {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="flash {{ category }}"id='flash-message'>
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+    <form method="post">
+        <input type="text" name="subject" placeholder="Subject" required>
+        <input type="email" name="email" placeholder="Your Email" required>
+        <textarea name="message" placeholder="Your message" rows="5" required>
+        </textarea>
+        <button type="submit">Send Message</button>
+
+    </form>
+</div>
+<script>
+    // show flash message
+    const flashMessageElement = document.getElementById('flash-message')
+    flashMessageElement.style.display = 'block';
+    setTimeout(() => {
+        flashMessageElement.style.display = 'none'
+        window.location.href = '/'
+    }, 2000);
+</script>
+</body>
+</html>
