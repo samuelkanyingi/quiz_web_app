@@ -53,7 +53,7 @@ flask db migrate
 flask db upgrade
 ``` 
 
-**4. Run the Flask Server **
+**4. Run the Flask Server**
 ```
 flask run
 ```
@@ -64,10 +64,9 @@ flask run
 
 ### Create a quiz
 1. Log in your account
-2. Create Deck by clicking add deck button
-3. Click deck name you created
-4. Click deck name and navigate to add new question button
-5.  add question and answers and click save button
+2. Click Add Deck button
+3. Click deck name and navigate to add new question button
+5. Add question and answers and click save button
 6. Click take quiz button to start quiz
 
 ### Managing Quizzes
@@ -78,11 +77,11 @@ flask run
 * User Authentication: Secure login and registration
 * Deck creation
 * Question and answer management
-Quiz taking
+quiz taking
 
 ## Contributing
 * Please Submit a pull request to add a new feature
-* Open an issue an issue for improvements
+* Open an issue  for improvements
 
 ## License
 This project is licensed under the MIT license
