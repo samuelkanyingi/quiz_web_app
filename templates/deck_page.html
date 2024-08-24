@@ -108,9 +108,10 @@ ul li {
        .modal-content {
         background-color: greenyellow;
         margin: 15% auto;
-        padding: 20px;
+        padding: 38px;
         border: 1px solid #888;
         width: 30%;
+        
         border-radius: 5px;
        }
        .close {
@@ -225,7 +226,7 @@ ul li {
     margin: 10px;
     border-radius: 5px;
 }
-#feedback-container { 
+/* #feedback-container { 
     display: block;
     justify-content: space-around;
     
@@ -250,7 +251,7 @@ ul li {
 #feedback-container label {
     font-weight: bold;
     font-size: 18px;
-}
+} */
 .button-container {
     display: block;
     gap: 20px;
@@ -402,7 +403,7 @@ td.quiz-answer {
 
             <button type="submit">Save</button>
 
-            <button type="button" id="addMoreQuizBtn">Add More Quiz</button>
+            <button type="button" id="addMoreQuizBtn">clear</button>
         </form>
     </div>
 </div>
@@ -603,7 +604,7 @@ let quizzes = [];
         modalContent.appendChild(answerE1);
         modalContent.appendChild(nextQuestionBtn);
 
-        showFeedbackButtons();
+        //showFeedbackButtons();
     } else {
         // no more questions left
         modalContent.innerHTML = '<p><center><h2>Congrats You are finished studying  &#127881 </h2></center> </p>'
@@ -710,66 +711,66 @@ confirmDeleteBtn.onclick = function() {
 };
 
 
-function showFeedbackButtons(modalContent) {
-    const existingContainer = document.getElementById('feedback-container');
-    if (existingContainer) {
-        return; // If it already exists, stop the function from adding more buttons
-    }
-    const takeQuizModal =document.getElementById('takeQuizModal')
-    var modalContent = takeQuizModal.querySelector('.modal-content');
-    // if (existingContainer) {
+// function showFeedbackButtons(modalContent) {
+//     const existingContainer = document.getElementById('feedback-container');
+//     if (existingContainer) {
+//         return; // If it already exists, stop the function from adding more buttons
+//     }
+//     const takeQuizModal =document.getElementById('takeQuizModal')
+//     var modalContent = takeQuizModal.querySelector('.modal-content');
+//     // if (existingContainer) {
     //     return; // If it already exists, stop the function from adding more buttons
     // }
     // create and style feedback buttons
-    const feedbackContainer = document.createElement('div');
-    feedbackContainer.id = 'feedback-container'
-    feedbackContainer.classList.add('feedback-buttons')
+    // const feedbackContainer = document.createElement('div');
+    // feedbackContainer.id = 'feedback-container'
+    // feedbackContainer.classList.add('feedback-buttons')
 
     
 
     
 
-    // create aand style  feedback container
-    var showFeedbackContainer = document.createElement('div');
-    showFeedbackContainer.classList.add('feedback-buttons');
-    feedbackContainer.id = 'feedback-container';
+    // // // create aand style  feedback container
+    // // var showFeedbackContainer = document.createElement('div');
+    // showFeedbackContainer.classList.add('feedback-buttons');
+    // feedbackContainer.id = 'feedback-container';
 
 
 
     // create and style feedback buttons
-    const buttons = [
-        { text: 'Again', delay: 60000 + 60000},     // 2 minute
-        { text: 'Hard', delay:  60000 + 120000},     // 3 minutes
-        { text: 'Good', delay:  60000 + 180000},     // 4 minutes
-        { text: 'Easy', delay:  60000 + 240000}      // 5 minutes
-    ];
+    // const buttons = [
+    //     { text: 'Again', delay: 60000 + 60000},     // 2 minute
+    //     { text: 'Hard', delay:  60000 + 120000},     // 3 minutes
+    //     { text: 'Good', delay:  60000 + 180000},     // 4 minutes
+    //     { text: 'Easy', delay:  60000 + 240000}      // 5 minutes
+    // ];
  
+// 
 
+    // buttons.forEach(buttonInfo => {
+    //     const container = document.createElement('div')
+    //     container.style.display = 'inline-block';
+    //     container.style.marginRight = '20px';
+    //     const label = document.createElement('label')
+    //     label.textContent = `Review in ${buttonInfo.delay / 60000} minutes`;
+    //     label.style.display = 'block';
+    //     label.style.marginBottom = '10px';
 
-    buttons.forEach(buttonInfo => {
-        const container = document.createElement('div')
-        container.style.display = 'inline-block';
-        container.style.marginRight = '20px';
-        const label = document.createElement('label')
-        label.textContent = `Review in ${buttonInfo.delay / 60000} minutes`;
-        label.style.display = 'block';
-        label.style.marginBottom = '10px';
-
-        const button = document.createElement('button');
-        button.textContent = buttonInfo.text;
-        button.dataset.delay = buttonInfo.delay; // Set delay time in button's dataset
-        button.addEventListener('click', function() {
+        // const button = document.createElement('button');
+        // button.textContent = buttonInfo.text;
+        // button.dataset.delay = buttonInfo.delay; // Set delay time in button's dataset
+        // button.addEventListener('click', function() {
             
-            this.disabled = true;
+        //     this.disabled = true;
             
-        });
+        // });
         // feedbackContainer.appendChild(label)
         // feedbackContainer.appendChild(button);
-        container.appendChild(label)
-        container.appendChild(button)
-        feedbackContainer.appendChild(container)
-    });
-    modalContent.appendChild(feedbackContainer)
+    //     container.appendChild(label)
+    //     container.appendChild(button)
+    //     feedbackContainer.appendChild(container)
+    // });
+    // modalContent.appendChild(feedbackContainer)
 
     fetch('/get_current_question_id')
         .then(response => response.json())
@@ -778,13 +779,13 @@ function showFeedbackButtons(modalContent) {
                 const currentQuestionId = data.id;
                 console.log('Current Question ID:', currentQuestionId);
 
-                feedbackContainer.querySelectorAll('button').forEach(button => {
-                    button.addEventListener('click', () => {
-                        const delayTime = parseInt(button.dataset.delay, 10); // Get delay time from button's dataset
-                        handleFeedback(delayTime, currentQuestionId)
-                            .then(() => loadNextQuestion()); // After feedback, load the next question
-                    });
-                });
+                // feedbackContainer.querySelectorAll('button').forEach(button => {
+                //     button.addEventListener('click', () => {
+                //         const delayTime = parseInt(button.dataset.delay, 10); // Get delay time from button's dataset
+                //         handleFeedback(delayTime, currentQuestionId)
+                //             .then(() => loadNextQuestion()); // After feedback, load the next question
+                //     });
+                // });
             } else {
                 console.error('Failed to retrieve current question ID');
             }
@@ -796,7 +797,7 @@ function showFeedbackButtons(modalContent) {
     .catch(error => {
         console.error('Error:', error);
     });
-}
+
 
 function handleFeedback(delayTime, questionId) {
     // const currentQuestionId = document.querySelector('.question').dataset.questionId;
