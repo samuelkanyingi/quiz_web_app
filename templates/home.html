@@ -371,7 +371,6 @@ button a{
                 <tr>
                     <th>Deck</th>
                     <th>Number of quizzes </th>
-                    <th>Due quizzes</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -379,10 +378,8 @@ button a{
                 <!-- Rows added dynamically -->
                 {% for deck in decks %}
                 <tr>
-                <!-- <td>{{ deck.title }}</td> -->
                 <td><a href="{{ url_for('deck_page', deck_id=deck.id) }}">{{ deck.title }}</a></td>
                 <td>{{ deck.quiz_count }}</td>
-                <td>{{ deck.due_quiz_count }}</td>
                 <td>
                     <!-- <button>Edit</button> -->
                     <button class="edit-btn" data-deck-id="{{ deck.id }}" data-deck-title="{{ deck.title }}">
