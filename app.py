@@ -12,9 +12,6 @@ from itsdangerous import URLSafeTimedSerializer
 import hashlib
 from flask_bcrypt import Bcrypt
 
-#from functools import wraps
-from dotenv import load_dotenv
-load_dotenv()
 
 app = Flask(__name__, static_folder='static')
 app.secret_key = 'sammy'
@@ -322,14 +319,13 @@ def add_deck():
 
 
 
-@app.route('/delete_deck/<int:deck_id>', methods=['POST'])
+@app.route('/delete_deck/<int:deck_id>', methods=['POST', 'DELETE'])
 def delete_deck(deck_id):
     deck_to_delete = Deck.query.get_or_404(deck_id)
     db.session.delete(deck_to_delete)
     db.session.commit()
 
-    # Redirect to the home page after deletion
-    return redirect(url_for('home'))
+    return jsonify({'success': True}), 200
 
 @app.route('/edit_deck', methods=['POST'])
 def edit_deck():
