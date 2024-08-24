@@ -40,8 +40,7 @@
     font-family: 'calibri';
     width: 100%;
     margin-top: 0;
-    margin-bottom: 50px;
-    /* padding: 10px 0; */
+    margin-bottom: 20px;
 }
 #login, #signup {
     border: none;
@@ -335,11 +334,9 @@ td.quiz-answer {
             <a href="#">Quiz App</a>
         </div>
         <ul>
-            <li><a href="#">Home</a></li>
+            <li><a href="/">Home</a></li>
             <li><a href="{{ url_for('home') }}">Deck</a></li>
-            <li><a href="#">About</a></li>
-            <!-- <button id="login"><a href="#">logout</a></button> -->
-            <button id="logoutBtn" style="color:black; margin-right: 25px; padding: 5px 10px" >Logout</button>
+            <li><a href="{{ url_for('contact') }}">Contact</a></li>            
         </ul>
     </div>
 </nav>
