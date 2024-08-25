@@ -7,7 +7,7 @@ from flask_login import UserMixin, login_required, LoginManager, login_user, log
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer
 from flask_bcrypt import Bcrypt
-import hashlib
+
 
 app = Flask(__name__, static_folder='static')
 app.secret_key = 'sammy'
@@ -35,11 +35,14 @@ current_question_index = 0
 
 
 class User(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    ''' represents a user in the database 
+    inherit from  Usermixin  class to simplify user authentication and gives access to methods and properties
+    '''
+    id = db.Column(db.Integer, primary_key=True) #unique identifier for user
     username = db.Column(db.String(150), nullable=False)
     email = db.Column(db.String(150), nullable=False)
     password = db.Column(db.String(550), nullable=False)
-    decks = db.relationship('Deck', backref='owner', lazy=True) # Define the relationship to Deck
+    decks = db.relationship('Deck', backref='owner', lazy=True) # list of deck owned by user/ one to many relationship
 
 class PasswordResetToken(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -53,7 +56,6 @@ class Deck(db.Model):
     quiz_count = db.Column(db.Integer, default=0)
     title = db.Column(db.String(100), nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    #user = db.relationship('User', backref=db.backref('decks', lazy=True))
     quizzes = db.relationship('Quiz',backref='deck', lazy=True)
 
     def to_dict(self):
