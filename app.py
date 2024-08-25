@@ -27,7 +27,7 @@ bcrypt = Bcrypt(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-login_manager.login_view = "login"
+login_manager.login_view = "login" # page to redirect users when they are not logged in
 serializer = URLSafeTimedSerializer(app.secret_key) #generates token
 
 
@@ -107,56 +107,61 @@ def contact():
 
 @app.route('/signup',  methods=['GET', 'POST'])
 def signup():
+    ''' route to handle httpp request for a user signup '''
     if request.method == 'POST':
+        #extract values from request form data
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
 
-        print(f"Received signup data: Username={username}, Email={email}, Password={password}")
+        print(f"Received signup data: Username={username}, Email={email}, Password={password}")  # i used this line for debugging
+        #checks if user existing with same email or email
         existing_person = User.query.filter((User.username == username) | (User.email == email)).first()
         if existing_person:
             flash('username or email already exist.Please chose a different one', 'danger')
             return render_template('index.html')
-        
+        #if no username or email found hash passowrd using bcrypt library
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
         
-        #create a new instance or new user
+        #create a new instance of to represent user
         new_user = User(username=username, email=email, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
         flash('Signup success! Try login in', 'success')
         return redirect(url_for('login'))
-    return render_template('index.html')
+    return render_template('index.html') # GET request
 
 
 
 @app.route('/login', methods=['GET','POST'])
 def login():
+    ''' checks for http request for login route '''
     if request.method == 'POST':
+        # retrieve form data
         email = request.form.get('email')
         password = request.form.get('password')
-        print(f"Attempting login with email: {email}")
-        print(f"Provided password: {password}")
+        print(f"Attempting login with email: {email}") #for debugging
+        print(f"Provided password: {password}") # for debugging
 
-        # query databse for user credentials
+        # query database for a user with specified email address filter by email and return first user found
         user = User.query.filter_by(email=email).first()
-        if user and bcrypt.check_password_hash(user.password, password):
-            login_user(user)
+        if user and bcrypt.check_password_hash(user.password, password): #hash passwords and compare
+            login_user(user) # stores user info in a session  
             flash('Login success', 'success')
-            print('Login success')
-            return redirect(url_for('home'))
+            print('Login success') #debugging line
+            return redirect(url_for('home')) 
         else:
             flash('Invalid credentials', 'danger')
-            #return redirect(url_for('login'))
             return render_template('index.html')
     else:
-        return render_template('index.html')
+        return render_template('index.html') # GET request to login route
 
 #logout user
 @app.route('/logout')
 @login_required
 def logout():
-    logout_user()
+    ''' function that logs out user from a session '''
+    logout_user() #removes user session meaning user will need to authnticate to log in again
     flash('You have been logged out.', 'success')
     return redirect(url_for('landing_page'))
 
