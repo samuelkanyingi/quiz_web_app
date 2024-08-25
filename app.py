@@ -7,7 +7,7 @@ from flask_login import UserMixin, login_required, LoginManager, login_user, log
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer
 from flask_bcrypt import Bcrypt
-
+import hashlib #store password securely on database
 
 app = Flask(__name__, static_folder='static')
 app.secret_key = 'sammy'
@@ -35,7 +35,7 @@ current_question_index = 0
 
 
 class User(UserMixin, db.Model):
-    ''' represents a user in the database 
+    '''represents a user in the database 
     inherit from  Usermixin  class to simplify user authentication and gives access to methods and properties
     '''
     id = db.Column(db.Integer, primary_key=True) #unique identifier for user
@@ -45,18 +45,21 @@ class User(UserMixin, db.Model):
     decks = db.relationship('Deck', backref='owner', lazy=True) # list of deck owned by user/ one to many relationship
 
 class PasswordResetToken(db.Model):
+    """Represents a password reset token in database.
+    """
     id = db.Column(db.Integer, primary_key=True)
     user_id  =db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     token = db.Column(db.String(1256), nullable=False)
     expires_at = db.Column(db.DateTime, nullable=False)
 
 class Deck(db.Model):
+    '''' represents deck of quizzes in the database '''
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=True)
     quiz_count = db.Column(db.Integer, default=0)
-    title = db.Column(db.String(100), nullable=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    quizzes = db.relationship('Quiz',backref='deck', lazy=True)
+    title = db.Column(db.String(100), nullable=True) #for testing purposes
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False) # represents owner of a deck
+    quizzes = db.relationship('Quiz',backref='deck', lazy=True) # list of quizzes associated with a deck
 
     def to_dict(self):
         return {'id': self.id, 'name': self.name, 'quiz_count': self.quiz_count, 'title': self.title}
