@@ -2,16 +2,12 @@ from flask import Flask, jsonify, render_template, request, flash, session, redi
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from datetime import datetime, timedelta
-#from werkzeug.security import generate_password_hash
 from flask_bcrypt import Bcrypt
 from flask_login import UserMixin, login_required, LoginManager, login_user, logout_user, current_user
 from flask_mail import Mail, Message
-import os
-from werkzeug.security import generate_password_hash
 from itsdangerous import URLSafeTimedSerializer
-import hashlib
 from flask_bcrypt import Bcrypt
-
+import hashlib
 
 app = Flask(__name__, static_folder='static')
 app.secret_key = 'sammy'
@@ -36,7 +32,7 @@ serializer = URLSafeTimedSerializer(app.secret_key) #generates token
 
 
 current_question_index = 0 
-total_score = 0
+
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -149,14 +145,12 @@ def login():
 @app.route('/logout')
 @login_required
 def logout():
-    # session.pop('user_id', None)
     logout_user()
     flash('You have been logged out.', 'success')
     return redirect(url_for('landing_page'))
 
 
 def get_current_question():
-    # Example logic to get the latest question
     current_question = Quiz.query.order_by(Quiz.id.desc()).first()
     if current_question:
         return current_question
@@ -174,7 +168,7 @@ def forgot_password():
         token = serializer.dumps(email, salt='password-reset-salt')
         hashed_token = hashlib.sha256(token.encode()).hexdigest()
 
-        #store hashed token in dtabase with expiration time
+        #store hashed token in database with expiration time
 
         expiration_time = datetime.now() + timedelta(hours=1)
         reset_token = PasswordResetToken(user_id=user.id, token=hashed_token, expires_at=expiration_time)
@@ -204,10 +198,6 @@ def reset_password(token):
 
         confirm_password = request.form.get('confirm_password')
 
-   
-    
-        #return 'Passwords do not match', 400
-    
         #hash password
         hashed_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
 
@@ -264,10 +254,6 @@ def update_next_review_time():
 def landing_page():
     return render_template('landing_page.html')
 
-
-# @app.route('/login')
-# def get_message():
-#     return render_template('index.html', message="hello quiz app")
 
 @app.route('/home')
 @login_required  # Ensure the user is logged in
@@ -344,7 +330,7 @@ def edit_deck():
 
 @app.route('/deck/<int:deck_id>', methods=['GET'])
 def deck_page(deck_id):
-    deck = Deck.query.get_or_404(deck_id)  # Assuming Deck is your model
+    deck = Deck.query.get_or_404(deck_id) 
     quizzes = Quiz.query.filter_by(deck_id=deck_id).all()    
     return render_template('deck_page.html', deck=deck, quizzes=quizzes)
 
@@ -451,31 +437,7 @@ def get_next_question():
         })
     else:
         print("No more questions available")  # Debugging line
-        # No more questions available
-        #return jsonify({'message': 'No more questions available'}), 404
-
-
-@app.route('/api/quizzes/<int:deck_id>')
-def get_quizzes(deck_id):
-    quizzes = Quiz.query.filter_by(deck_id=deck_id).all()
-    return jsonify([{
-        'id': quiz.id,
-        'question': quiz.question,
-        'answer': quiz.answer
-    } for quiz in quizzes
-    ])
-
-@app.route('/take_quiz')
-def take_quiz():
-    due_questions = Quiz.query.filter(Quiz.next_review_time <= datetime.utcnow()).all()
-    if due_questions:
-        return render_template('home.html', questions=due_questions)
-    else:
-        flash('NoQuestiosn are currently due for review.')
-        return ("success")
-
-
-
+   
 
 if __name__ == '__main__':
     app.run(debug=True)
