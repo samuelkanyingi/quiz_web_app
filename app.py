@@ -76,21 +76,25 @@ class Quiz(db.Model):
 
 @login_manager.user_loader
 def load_user(id):
+    ''' finds user from database using specified id  and return user object with user credentials '''
     return User.query.get(id)
 
-with app.app_context():
-    db.create_all()
+with app.app_context(): 
+    db.create_all() ## create tables in database
 
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
+    ''' Handles http requests to cntact routes
+    '''
     if request.method == 'POST':
+        #extract form data values
         subject = request.form['subject']
         email = request.form['email']
         message = request.form['message']
 
         #create an email message
         msg = Message(subject, sender=email,
-                      recipients=['samuelkanyingi2016@gmail.com'])
+                      recipients=['samuelkanyingi2016@gmail.com']) #Message class used to create an email message
         msg.body = f'Message from {email}\n\n {message}'
 
         try:
@@ -99,7 +103,7 @@ def contact():
         except Exception as e:
             flash('Message  failed to send.Please try again later.', 'error')
             return redirect(url_for('contact'))
-    return render_template('contact.html')
+    return render_template('contact.html') #GeET Request
 
 @app.route('/signup',  methods=['GET', 'POST'])
 def signup():
