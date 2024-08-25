@@ -146,7 +146,8 @@
             // logout when yes is clicked
             confirmLogoutBtn.onclick = function() {
                 logoutModal.style.display = "none";
-                window.location.href = "{{ url_for('logout') }}";
+                // window.location.href = "{{ url_for('logout') }}";
+                window.location.href = '/logout'
             }
         })
         window.onclick = function(event) {
