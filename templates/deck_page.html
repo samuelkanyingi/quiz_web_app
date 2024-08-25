@@ -21,7 +21,7 @@
     <nav class="navbar">
     <div class="navbardiv">
         <div class="logo">
-            <a href="#">Quiz App</a>
+            <a href="#">FlashCard App</a>
         </div>
         <ul>
             <li><a href="/">Home</a></li>
@@ -82,7 +82,7 @@
 <div id="addQuizModal" class="modal">
     <div class="modal-content">
         <span class="close"  id="closeAddQuizModal">&times;</span>
-        <h2>Add Quiz Form</h2>
+        <h2>Add Question & Answer</h2>
         <form id="addQuizForm" method="POST" action="{{ url_for('add_quiz', deck_id=deck.id) }}">
             <input type="hidden" name="deck_id" value="{{ deck.id }}">
             <label for="question">Question:</label> <br>
