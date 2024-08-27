@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz page</title>
+    <!-- Favicon links -->
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='img/favicon_io/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon_io/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='img/favicon/favicon-16x16.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/deck_page.css') }}">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+ 
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+    <div class="navbardiv">
+        <div class="logo">
+            <a href="#">FlashCard App</a>
+        </div>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="{{ url_for('user.home') }}">Deck</a></li>
+            <li><a href="{{ url_for('contact.contact') }}">Contact</a></li>            
+        </ul>
+    </div>
+</nav>
+
+    
+<!-- <button id="addQuizBtn">Add Quiz</button> -->
+ <div class="button-container">
+        <button id="addQuizBtn">Add new question</button>
+        <button id="takeQuizBtn">Take Quiz</button>
+    </div>
+<div id="table-container">
+   
+        <table id="quiz-table">
+            <thead>
+                <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                {% for quiz in quizzes %}
+                <tr>
+                    <td class="quiz-question">{{ quiz.question }}</td>
+                    <!-- <td class="quiz-answer">{{ quiz.answer }} -->
+                        <td>
+                        <span class="answer-text">{{ quiz.answer }}</span>
+                        <span class="eye-icon" onclick=toggleAnswerVisiblity(this)>
+                            <i class="fa fa-eye"></i>    
+                        </span>
+                    </td>
+                    <td>
+                    <div class="td-btn-container">
+                        <!-- Edit Button -->
+                        <button class="edit" data-quiz-id="{{ quiz.id }}" data-question="{{ quiz.question }}" data-answer="{{ quiz.answer }}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <!-- Delete Button -->
+                        <form action="{{ url_for('quiz.delete_quiz', quiz_id=quiz.id) }}" method="post"  class="inline-delete">
+                            <button class="delete" type="submit">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </form>
+                    </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+
+<!-- Add Quiz Modal -->
+<div id="addQuizModal" class="modal">
+    <div class="modal-content">
+        <span class="close"  id="closeAddQuizModal">&times;</span>
+        <h2>Add Question & Answer</h2>
+        <form id="addQuizForm" method="POST" action="{{ url_for('quiz.add_quiz', deck_id=deck.id) }}">
+            <input type="hidden" name="deck_id" value="{{ deck.id }}">
+            <label for="question">Question:</label> <br>
+            <input type="text" id="question" name="question" required> <br>
+            <label for="answer">Answer:</label> <br>
+            <input type="text" id="answer" name="answer" required> <br>
+
+            <button type="submit">Save</button>
+
+            <button type="button" id="addMoreQuizBtn">clear</button>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Question Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="closeEditModal">&times;</span>
+        <h2>Edit Question</h2>
+        <form action="{{ url_for('quiz.edit_quiz') }}" method="post">
+            <input type="hidden" id="edit-quiz-id" name="quiz_id">
+            <label for="edit-question">Question:</label> <br>
+            <input type="text" id="edit-question" name="question" required> <br>
+            <label for="edit-answer">Answer:</label><br>
+            <input type="text" id="edit-answer" name="answer" required> <br>
+            <button type="submit">Save</button>
+        </form>
+    </div>
+</div>
+
+<!--TakeQuiz modal-->
+<div id="takeQuizModal" class="modal">
+    <div class = "modal-content">
+        <span class= "close" id="closeTakeQuizModal">&times;</span>
+        <h2>Take quiz</h2>
+        <p>Quiz content goes here</p>
+        <div id="feedback-container"></div>
+    </div>
+</div>
+
+<!-- Delete Confirmation modal for deck_page.html -->
+ <div id="deleteConfirmationModal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="closeDeleteModal">&times;</span>
+        <h2>Are you very sure you want to delete?</h2>
+        <button id="confirmDeleteBtn" class="confirm-btn">Yes</button>
+        <button id="cancelDeleteBtn" class="cancel-btn">No</button>
+    </div>
+ </div>
+
+<!--i have inserted here to allow html to be fully loaded before loading js code-->
+<script src="{{ url_for('static', filename='js/deck_page.js') }}"></script>
+</body>
+</html>
