@@ -14,7 +14,7 @@ function toggleAnswerVisiblity(iconElement) {
     }
 }
 
-// Add quiz modal
+// Add quiz modal and button clicked
 var addQuizModal = document.getElementById("addQuizModal");
 var addQuizBtn = document.getElementById("addQuizBtn");
 var closeAddQuizModal = document.getElementById("closeAddQuizModal");
@@ -45,9 +45,10 @@ var closeEditQuizModal = document.getElementById("closeEditModal");
 //open edit quiz and populate it with current quiz data
 document.querySelectorAll('.edit').forEach(function(button) {
    button.addEventListener('click', function() {
-       var quizId = this.getAttribute('data-quiz-id');
+       var quizId = this.getAttribute('data-quiz-id'); // reteive values
        var question = this.getAttribute('data-question');
        var answer = this.getAttribute('data-answer');
+
        document.getElementById('edit-quiz-id').value = quizId;
        document.getElementById('edit-question').value = question;
        document.getElementById('edit-answer').value = answer;
@@ -244,52 +245,7 @@ confirmDeleteBtn.onclick = function() {
    deleteConfirmationModal.style.display = "none";
 };
 
-// fetch current question id from the server
-fetch('/get_current_question_id')
-    .then(response => response.json())
-    .then(data => {
-    if (data.id) {
-        const currentQuestionId = data.id;
-        console.log('Current Question ID:', currentQuestionId);
-    } else {
-        console.error('Failed to retrieve current question ID');
-    }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
 
-
-function handleFeedback(delayTime, questionId) {
- 
-   console.log('Question ID for update:', questionId);
-  
-   // hide question
-   const questionElement = document.querySelector('#takeQuizModal p')
-   if (questionElement) {
-       questionElement.style.display = 'none';
-   }
-   //send the delay time to backend to updat equestion review time
-   return fetch('/update_next_review_time', {
-       method: 'POST',
-       headers: {
-           'Content-Type': 'application/json'
-       },
-       body: JSON.stringify({
-           id: questionId,
-           delay_time: delayTime // send delay time in milliseconds
-       })
-   })
-   .then(response => response.json())
-   .then(data => {
-       if (data.success) {
-           console.log('Next review time updated successfully');
-           loadNextQuestion();  // Load the next question after feedback is handled
-       } else {
-           console.error('Failed to update next review time');
-       }
-   })
-}
 
 function loadNextQuestion() {
    fetch('/get_next_question')
