@@ -40,4 +40,3 @@ class Quiz(db.Model):
     question = db.Column(db.String(200), nullable=False)
     answer = db.Column(db.String(255), nullable=False)
     deck_id = db.Column(db.Integer, db.ForeignKey('deck.id'), nullable=True) # id of deck it belongs to
-    next_review_time = db.Column(db.DateTime, nullable=True, default=datetime.utcnow) #next time quiz is to be reviewd
