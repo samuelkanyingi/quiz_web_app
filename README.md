@@ -15,7 +15,7 @@ A web based application that allows users to create, manage and take quizzes. Th
 ## Project Overview 
 This project is a flashcard application built using flask on the backend and html, css and javascript on the frontend. It allows users to create decks that store quizzez, add questions and manage questions and finally take quiz.
 
-# Architucture Overview
+# Architecture Overview
 Our app uses microservice architecture for frontend and backend
 
 ### Backend
@@ -46,14 +46,19 @@ cd quiz-web_app
 pip install -r requirements.txt
 ```
 
-**3.  Initialize the database** 
+**3. Install Python dependencies**
+```
+cd app
+```
+
+**4.  Initialize the database** 
 ```
 flask db init
 flask db migrate
 flask db upgrade
 ``` 
 
-**4. Run the Flask Server**
+**5. Run the Flask Server**
 ```
 flask run
 ```
